@@ -1,0 +1,54 @@
+/* 
+    Created on : 19/09/2017, 11:15:23 PM
+    Author     : Santiago Betancur Villegas <santiago-betancur at hotmail.com>
+*/
+
+.fondo{
+    background-image: url("../imagenes/parUmanizales.jpg");
+    background-size: cover;
+}
+
+.inicio{
+    text-align: center;
+}
+
+.inicio label{
+    color: limegreen;
+    font-size: 20px;
+    font-family: Trebuchet MS;
+    border: 1px solid #DDD;
+    border-radius: 9px;
+    background-color: #FFF;
+}
+
+.inicio input {
+    background-color: #FFF;
+    border: 1px solid #DDD;
+    border-radius: 9px;
+    color: black;
+    padding: 10px;
+    margin: 5px auto 0px auto;
+    width: 77%;
+}
+
+.titulo{
+    color: limegreen;
+    font-family: Trebuchet MS;
+    font-size: 30px;
+    border: 1px;
+    border-radius: 9px;
+    background-color: #FFF;
+}
+
+.inicio button{
+    width: 190px;
+    height: 35px;
+    border-radius: 5px;
+    color: limegreen;
+    background: white;
+    /*border: dotted;*/
+    margin-left: 5px;
+    font-size: 14px;
+    margin-top: 20px;
+}
+
