@@ -52,3 +52,12 @@
     margin-top: 20px;
 }
 
+#foto{
+    background-image: url("../imagenes/ima_movimiento2.jpg");
+    width: 157px;
+    height: 140px;
+    position: relative;
+    top: 200px;
+    left: 1100px;
+    border-radius: 9px;
+}

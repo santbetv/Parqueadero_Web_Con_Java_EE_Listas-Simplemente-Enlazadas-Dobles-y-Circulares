@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>#{bundle.titulo}</title>
+    </h:head>
+    <h:body>
+        <h:form>
+            <p:panel header="#{bundle.titulo}" id="pnlDatosVehiculo">
+                <p:panelGrid columns="2" > 
+                    <p:outputLabel value="#{bundle.placa}"/>
+                    <p:inputText disabled="#{beanParqueadero.deshabilitarNuevo}"/>
+                    <p:outputLabel value="#{bundle.fechaDeIngreso}"/>
+                    <p:calendar disabled="#{beanParqueadero.deshabilitarNuevo}" showOn="button" readonlyInput="true" pattern="MM/dd/yyyy HH:mm:ss"/>
+                    <p:outputLabel value="#{bundle.fechaDeSalida}"/>
+                    <p:calendar disabled="#{beanParqueadero.deshabilitarNuevo}" showOn="button" readonlyInput="true" pattern="MM/dd/yyyy HH:mm:ss"/>
+                    <p:outputLabel value="#{bundle.tipoDeVehiculo}"/>
+                    <p:selectOneMenu disabled="#{beanParqueadero.deshabilitarNuevo}" style="width: 120px;">
+                        <f:selectItem itemValue="1" itemLabel="#{bundle.moto}"/>
+                        <f:selectItem itemValue="2" itemLabel="#{bundle.automovil}"/>
+                        <f:selectItem itemValue="3" itemLabel="#{bundle.buseta}"/>
+                    </p:selectOneMenu>
+                    <p:outputLabel value="#{bundle.valorApagar}"/>
+                    <p:inputText disabled="#{beanParqueadero.deshabilitarNuevo}" />
+                    <p:outputLabel value="#{bundle.casco}"/>
+                    <p:selectBooleanCheckbox disabled="#{beanParqueadero.deshabilitarNuevo}"/>
+                    <p:outputLabel value="#{bundle.pasacintas}"/>
+                    <p:selectBooleanCheckbox disabled="#{beanParqueadero.deshabilitarNuevo}" />
+                    <p:outputLabel value="#{bundle.numeroDeAsientos}" />
+                    <p:spinner min="5" max="40" disabled="#{beanParqueadero.deshabilitarNuevo}"/>
+                </p:panelGrid>
+            </p:panel>
+            <h:panelGroup layout="block" id="pnlBotones">   
+                <p:commandButton value="#{bundle.btnPrimero}"/>
+                <p:commandButton value="#{bundle.btnSiguiente}"/>
+                <p:commandButton value="#{bundle.btnUltimo}"/>
+                <p:commandButton value="#{bundle.btnNuevo}" update="pnlDatosVehiculo,pnlBotones" action="#{beanParqueadero.habilitarGuardado()}" rendered="#{beanParqueadero.deshabilitarNuevo}"/>
+                <p:commandButton value="#{bundle.btnGuardar}" rendered="#{!beanParqueadero.deshabilitarNuevo}"/>
+            </h:panelGroup>
+        </h:form>
+    </h:body>
+</html>
+
