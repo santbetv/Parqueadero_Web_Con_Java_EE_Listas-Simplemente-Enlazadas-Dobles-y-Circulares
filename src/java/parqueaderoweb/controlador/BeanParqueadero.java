@@ -29,7 +29,7 @@ public class BeanParqueadero implements Serializable {
     private boolean deshabilitarInvertirLista = false;///---
 
     public BeanParqueadero() {
-    } 
+    }
 
     public boolean isDeshabilitarInvertirLista() {
         return deshabilitarInvertirLista;
@@ -197,7 +197,24 @@ public class BeanParqueadero implements Serializable {
         listaVehiculos.eliminarNodoxPosicion(getPosicionQueSeraEliminada());
         deshabilitarNuevo = true;
         irAlPrimero();
+    }
 
+    public void metodoMostrarDatosPares() {
+        listaVehiculos.verListaConNumeroImpares();
+        deshabilitarNuevo = true;
+        irAlPrimero();
+    }
+
+    public void mostrarUltimoEnELPrimero() {
+        listaVehiculos.invertirSoloExtremos();
+        deshabilitarNuevo = true;
+        irAlPrimero();
+    }
+    
+    public void mostrarNodosInternos() {
+        listaVehiculos.invertirSoloNodosInternos();
+        deshabilitarNuevo = true;
+        irAlPrimero();
     }
 
     @PostConstruct//para despues que se ins se llame este objeto
@@ -206,6 +223,7 @@ public class BeanParqueadero implements Serializable {
         listaVehiculos.adicionarNodoAlFinal(new Vehiculo("2TVL03D", new Date()));
         listaVehiculos.adicionarNodoAlFinal(new Vehiculo("3NAC995", new Date()));
         listaVehiculos.adicionarNodoAlFinal(new Vehiculo("4SAN201", new Date()));
+//        listaVehiculos.adicionarNodoAlFinal(new Vehiculo("5MAT201", new Date()));
         irAlPrimero();
     }
 }

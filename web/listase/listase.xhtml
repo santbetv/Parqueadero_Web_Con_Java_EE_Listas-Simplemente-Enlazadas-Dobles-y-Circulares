@@ -44,7 +44,7 @@
                         <p:selectBooleanCheckbox disabled="#{beanParqueadero.deshabilitarNuevo}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==2}"/>
                         <p:outputLabel value="#{bundle.numeroDeAsientos}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==3}"/>
                         <p:spinner min="5" max="40" disabled="#{beanParqueadero.deshabilitarNuevo}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==3}"/>
-                    </p:panelGrid>  
+                    </p:panelGrid>
                 </p:panel>
             </p:panel>
             <p:panelGrid columns="1">
@@ -57,6 +57,9 @@
                     <p:commandButton value="#{bundle.btnGuardarAlInicio}" update="pnlDatosVehiculo,pnlBotones,pnlActualizarAdicionales,pnlErrores" rendered="#{!beanParqueadero.deshabilitarNuevo}" action="#{beanParqueadero.guarfarVehiculoAlInicio()}"/>
                     <p:commandButton value="#{bundle.btnInvertir}" update="pnlDatosVehiculo,pnlBotones,pnlActualizarAdicionales"  action="#{beanParqueadero.invertir()}" rendered="#{!beanParqueadero.deshabilitarInvertirLista}"/>
                     <p:commandButton value="#{bundle.btnEliminar}" update="pnlDatosVehiculo,pnlBotones,pnlActualizarAdicionales"  rendered="#{beanParqueadero.listaVehiculos.cabeza!=null}" action="#{beanParqueadero.eliminarVehiculo()}" />
+                    <p:commandButton value="Eliminar posiciones impares" update="pnlDatosVehiculo,pnlBotones,pnlActualizarAdicionales" action="#{beanParqueadero.metodoMostrarDatosPares()}"/>
+                    <p:commandButton value="Invertir Ultimo al Primero" update="pnlDatosVehiculo,pnlBotones,pnlActualizarAdicionales" action="#{beanParqueadero.mostrarUltimoEnELPrimero()}"/>
+                    <p:commandButton value="Invertir Nodos Internos Si es par" update="pnlDatosVehiculo,pnlBotones,pnlActualizarAdicionales" action="#{beanParqueadero.mostrarNodosInternos()}"/>
                 </h:panelGroup>
             </p:panelGrid>
         </h:form>
