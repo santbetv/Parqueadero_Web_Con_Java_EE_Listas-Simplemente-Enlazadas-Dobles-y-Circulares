@@ -5,7 +5,16 @@ import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.util.Date;
 import javax.annotation.PostConstruct;
+import org.primefaces.model.diagram.Connection;
+import org.primefaces.model.diagram.DefaultDiagramModel;
+import org.primefaces.model.diagram.DiagramModel;
+import org.primefaces.model.diagram.Element;
+import org.primefaces.model.diagram.endpoint.DotEndPoint;
+import org.primefaces.model.diagram.endpoint.EndPointAnchor;
 import parqueadero.Controlador.ListaSE;
+import parqueadero.Modelo.Automovil;
+import parqueadero.Modelo.Buseta;
+import parqueadero.Modelo.Moto;
 import parqueadero.Modelo.Nodo;
 import parqueadero.Modelo.Vehiculo;
 
@@ -22,6 +31,9 @@ public class BeanParqueadero implements Serializable {
     private Nodo nodoMostrar = new Nodo(new Vehiculo()); //ayudante que toma los datos de la lista y me los va a mostrar en la paguina
     private ListaSE listaVehiculos = new ListaSE(); // Voy a tener acceso a los metodos de listaSE
     private int posicionQueSeraEliminada;
+    private DefaultDiagramModel model;//Este es el diagrama que me permite ver la opciones en la web
+    private boolean opcionSeleccionado;//Capturo el tipo de opcion seleccionada caso o pasaCintas
+    private byte numeroDeAsientos = 5;//Capturo el numero de nuemroAsientos buseta
 
     private boolean deshabilitarBtnIrAlPrimero = false;///---
     private boolean deshabilitarBtnIrAlSiguiente = false;///---
@@ -29,6 +41,22 @@ public class BeanParqueadero implements Serializable {
     private boolean deshabilitarInvertirLista = false;///---
 
     public BeanParqueadero() {
+    }
+
+    public boolean isOpcionSeleccionado() {
+        return opcionSeleccionado;
+    }
+
+    public void setOpcionSeleccionado(boolean opcionSeleccionado) {
+        this.opcionSeleccionado = opcionSeleccionado;
+    }
+
+    public byte getNumeroDeAsientos() {
+        return numeroDeAsientos;
+    }
+
+    public void setNumeroDeAsientos(byte numeroDeAsientos) {
+        this.numeroDeAsientos = numeroDeAsientos;
     }
 
     public boolean isDeshabilitarInvertirLista() {
@@ -103,12 +131,15 @@ public class BeanParqueadero implements Serializable {
         this.deshabilitarNuevo = deshabilitarNuevo;
     }
 
-    public void habilitarGuardado() {
+    public void habilitarGuardado() { //Llama al boton nuevo 
         deshabilitarNuevo = false;
         nodoMostrar = new Nodo(new Vehiculo());
+        tipoVehiculoSeleccionado = 0;
+        opcionSeleccionado = true;
+        numeroDeAsientos = 5;
     }
-    //true es: SI false es: NO                                  
-
+   
+    //true es: SI false es: NO
     public void verificarDatosVacios() { // Creo metodo que valida si es 0, deshabilite la informacion que requiero
         if (listaVehiculos.contarNodos() == 0) {
             deshabilitarBtnIrAlPrimero = true;
@@ -134,8 +165,25 @@ public class BeanParqueadero implements Serializable {
         }
     }
 
+    private void seleccionarTipoVehiculo() {
+        if (nodoMostrar.getDato() instanceof Moto) {
+            tipoVehiculoSeleccionado = 1;
+            Moto moto = (Moto) nodoMostrar.getDato();
+            opcionSeleccionado = moto.isCasco();
+        } else if (nodoMostrar.getDato() instanceof Automovil) {
+            tipoVehiculoSeleccionado = 2;
+            Automovil auto = (Automovil) nodoMostrar.getDato();
+            opcionSeleccionado = auto.isPasaCintas();
+        } else if (nodoMostrar.getDato() instanceof Buseta) {
+            tipoVehiculoSeleccionado = 3;
+            Buseta buseta = (Buseta) nodoMostrar.getDato();
+            numeroDeAsientos = buseta.getNuemroAsientos();
+        }
+    }
+
     public void irAlPrimero() { // Sobre estos metodos coloco un condicional para determinar si es lo que requiero se ejecute
         nodoMostrar = listaVehiculos.getCabeza();
+        seleccionarTipoVehiculo();
         if (listaVehiculos.getCabeza() != null) {
             deshabilitarBtnIrAlPrimero = true;
             deshabilitarBtnIrAlSiguiente = false;
@@ -151,6 +199,7 @@ public class BeanParqueadero implements Serializable {
             nodoMostrar = nodoMostrar.getSiguiente();
             deshabilitarBtnIrAlSiguiente = false;
             deshabilitarBtnIrAlPrimero = false;
+            seleccionarTipoVehiculo();
         } else {
             deshabilitarBtnIrAlSiguiente = true;
             deshabilitarBtnIrAlUltimo = true;
@@ -163,6 +212,7 @@ public class BeanParqueadero implements Serializable {
             deshabilitarBtnIrAlUltimo = true;
             deshabilitarBtnIrAlSiguiente = true;
             deshabilitarBtnIrAlPrimero = false;
+            seleccionarTipoVehiculo();
         } else {
             deshabilitarBtnIrAlSiguiente = true;
             deshabilitarBtnIrAlUltimo = true;
@@ -170,14 +220,28 @@ public class BeanParqueadero implements Serializable {
     }
 
     public void guardarVehiculo() {
-        listaVehiculos.adicionarNodoAlFinal(nodoMostrar.getDato());//Adiciono en lista
+        Vehiculo vehiculo = null;
+        switch (tipoVehiculoSeleccionado) {
+            case 1:
+                vehiculo = new Moto(opcionSeleccionado, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada());
+                break;
+            case 2:
+                vehiculo = new Automovil(opcionSeleccionado, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada());
+                break;
+            case 3:
+                vehiculo = new Buseta(numeroDeAsientos, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada());
+                break;
+        }
+        listaVehiculos.adicionarNodoAlFinal(vehiculo);//Adiciono en lista
         deshabilitarNuevo = true;
+        tipoVehiculoSeleccionado = 0;
         irAlPrimero();
     }
 
     public void guarfarVehiculoAlInicio() {
         listaVehiculos.adicionarNodoAlInicio(nodoMostrar.getDato());
         deshabilitarNuevo = true;
+        tipoVehiculoSeleccionado = 0;
         irAlPrimero();
     }
 
@@ -199,31 +263,82 @@ public class BeanParqueadero implements Serializable {
         irAlPrimero();
     }
 
-    public void metodoMostrarDatosPares() {
-        listaVehiculos.verListaConNumeroImpares();
+    public void metodoQueEliminaPosicionesImpares() {
+        listaVehiculos.metodoQueEliminaPosicionesImpares();
         deshabilitarNuevo = true;
         irAlPrimero();
     }
 
-    public void mostrarUltimoEnELPrimero() {
-        listaVehiculos.invertirSoloExtremos();
+    public void metodoQueInvierteUltimoEnELPrimero() {
+        listaVehiculos.invertirExtremos();
         deshabilitarNuevo = true;
         irAlPrimero();
     }
-    
+
     public void mostrarNodosInternos() {
-        listaVehiculos.invertirSoloNodosInternos();
+        listaVehiculos.invertirNodosInternos();
         deshabilitarNuevo = true;
         irAlPrimero();
     }
 
     @PostConstruct//para despues que se ins se llame este objeto
     public void llenarVehiculos() {
-        listaVehiculos.adicionarNodoAlFinal(new Vehiculo("1NAE033", new Date()));
-        listaVehiculos.adicionarNodoAlFinal(new Vehiculo("2TVL03D", new Date()));
-        listaVehiculos.adicionarNodoAlFinal(new Vehiculo("3NAC995", new Date()));
-        listaVehiculos.adicionarNodoAlFinal(new Vehiculo("4SAN201", new Date()));
+        listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "1NAE033", new Date()));
+        listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "2TVL03D", new Date()));
+        listaVehiculos.adicionarNodoAlFinal(new Moto(false, "3NAC995", new Date()));
+        listaVehiculos.adicionarNodoAlFinal(new Buseta((byte) 30, "4SAN123", new Date()));
 //        listaVehiculos.adicionarNodoAlFinal(new Vehiculo("5MAT201", new Date()));
         irAlPrimero();
+    }
+
+    public void init() {
+        model = new DefaultDiagramModel();
+        model.setMaxConnections(-1);
+
+//        Element elementA = new Element("", "5em", "5em");
+//        elementA.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
+//        elementA.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
+//
+//        model.addElement(elementA);
+        int cont = 1;
+        Nodo temp = listaVehiculos.getCabeza();
+        while (cont <= listaVehiculos.contarNodos()) {
+            if (cont == 1) {
+                crearPrimerNodoDiagrama(cont, temp);
+                temp = temp.getSiguiente();
+                cont++;
+            } else {
+                crearNodoDiagrama(cont, temp);
+                temp = temp.getSiguiente();
+                cont++;
+            }
+        }
+    }
+
+    public DiagramModel getModel() {
+        return model;
+    }
+
+    public void crearNodoDiagrama(int pos, Nodo nodo) {
+        int cont = pos * 5;
+        String horizontal = Integer.toString(cont) + "em";
+        String verticar = Integer.toString(cont) + "em";
+        Element nuevoVehiculo = new Element(nodo.getDato().getPlaca(), horizontal, verticar);
+        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.TOP));
+        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
+
+        model.addElement(nuevoVehiculo);
+
+        model.connect(new Connection(model.getElements().get(pos - 2).getEndPoints().get(1), nuevoVehiculo.getEndPoints().get(0)));
+    }
+
+    public void crearPrimerNodoDiagrama(int pos, Nodo nodo) {
+        int cont = 4;
+        String horizontal = Integer.toString(cont) + "em";
+        String verticar = Integer.toString(cont) + "em";
+        Element nuevoVehiculo = new Element(nodo.getDato().getPlaca(), horizontal, verticar);
+        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
+        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
+        model.addElement(nuevoVehiculo);
     }
 }
