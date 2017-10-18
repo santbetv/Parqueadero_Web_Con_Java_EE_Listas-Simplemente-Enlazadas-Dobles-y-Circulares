@@ -17,6 +17,7 @@ import parqueadero.Modelo.Buseta;
 import parqueadero.Modelo.Moto;
 import parqueadero.Modelo.Nodo;
 import parqueadero.Modelo.Vehiculo;
+import parqueadero.Modelo.Volqueta;
 
 /**
  *
@@ -28,19 +29,110 @@ public class BeanParqueadero implements Serializable {
 
     private boolean deshabilitarNuevo = true; //Este atributo es para que se deshabilite los ImputText
     private int tipoVehiculoSeleccionado; //Indica el numero que selecciona en el selectOneMenu, tipo de vehiculo
+    private int tipoVehiculoBuscado; //Indica el numero que selecciona en el selectOneMenu, tipo de vehiculo
     private Nodo nodoMostrar = new Nodo(new Vehiculo()); //ayudante que toma los datos de la lista y me los va a mostrar en la paguina
     private ListaSE listaVehiculos = new ListaSE(); // Voy a tener acceso a los metodos de listaSE
-    private int posicionQueSeraEliminada;
+    private int posicionQueSeraEliminada; //Variable que toma la posicion que requiero que se elimine
     private DefaultDiagramModel model;//Este es el diagrama que me permite ver la opciones en la web
     private boolean opcionSeleccionado;//Capturo el tipo de opcion seleccionada caso o pasaCintas
     private byte numeroDeAsientos = 5;//Capturo el numero de nuemroAsientos buseta
-
-    private boolean deshabilitarBtnIrAlPrimero = false;///---
-    private boolean deshabilitarBtnIrAlSiguiente = false;///---
-    private boolean deshabilitarBtnIrAlUltimo = false;///---
-    private boolean deshabilitarInvertirLista = false;///---
+    private byte numeroDeToneladas = 6;//Capturo el numero de nuemroAsientos buseta
+    private int numeroDeMotos;  //Variable que captura el numero de motos totales de LIstaSE
+    private int numeroDeAuto; //Variable que captura el numero de autos totales de LIstaSE
+    private int numeroDeBusetas; //Variable que captura el numero de busetas totales de LIstaSE
+    private int numeroDeVolquetas; //Variable que captura el numero de volquetas totales de LIstaSE
+    private int numeroDeNodos; //Variable que captura el numero de Nodos totales de LIstaSE
+    int valorQueIndicaLaSElleccion = 0; //Variable que captura el numero seleccionado en selectOneMenu, buscar vehiculo
+    //============================================================================
+    int numeroDeCiudadesContadas = 0; //Variable que toma el numero total de ciudades contadas
+    private String ciudadSeleccionada = ""; //Variable que toma la ciudad digitada por pantalla web
+    //----------------------------------------------------------------------------
+    private boolean deshabilitarBtnIrAlPrimero = false;//Indica en primera instancia que esta deshabilitado el boton 
+    private boolean deshabilitarBtnIrAlSiguiente = false;//Indica en primera instancia que esta deshabilitado el boton 
+    private boolean deshabilitarBtnIrAlUltimo = false;//Indica en primera instancia que esta deshabilitado el boton 
+    private boolean deshabilitarInvertirLista = false;//Indica en primera instancia que esta deshabilitado el boton 
 
     public BeanParqueadero() {
+    }
+
+    public int getNumeroDeVolquetas() {
+        return numeroDeVolquetas;
+    }
+
+    public void setNumeroDeVolquetas(int numeroDeVolquetas) {
+        this.numeroDeVolquetas = numeroDeVolquetas;
+    }
+
+    public byte getNumeroDeToneladas() {
+        return numeroDeToneladas;
+    }
+
+    public void setNumeroDeToneladas(byte numeroDeToneladas) {
+        this.numeroDeToneladas = numeroDeToneladas;
+    }
+
+    public int getValorQueIndicaLaSElleccion() {
+        return valorQueIndicaLaSElleccion;
+    }
+
+    public void setValorQueIndicaLaSElleccion(int valorQueIndicaLaSElleccion) {
+        this.valorQueIndicaLaSElleccion = valorQueIndicaLaSElleccion;
+    }
+
+    public int getNumeroDeCiudadesContadas() {
+        return numeroDeCiudadesContadas;
+    }
+
+    public void setNumeroDeCiudadesContadas(int numeroDeCiudadesContadas) {
+        this.numeroDeCiudadesContadas = numeroDeCiudadesContadas;
+    }
+
+    public String getCiudadSeleccionada() {
+        return ciudadSeleccionada;
+    }
+
+    public void setCiudadSeleccionada(String ciudadSeleccionada) {
+        this.ciudadSeleccionada = ciudadSeleccionada;
+    }
+
+    public int getTipoVehiculoBuscado() {
+        return tipoVehiculoBuscado;
+    }
+
+    public void setTipoVehiculoBuscado(int tipoVehiculoBuscado) {
+        this.tipoVehiculoBuscado = tipoVehiculoBuscado;
+    }
+
+    public int getNumeroDeNodos() {
+        return numeroDeNodos;
+    }
+
+    public void setNumeroDeNodos(int numeroDeNodos) {
+        this.numeroDeNodos = numeroDeNodos;
+    }
+
+    public int getNumeroDeMotos() {
+        return numeroDeMotos;
+    }
+
+    public void setNumeroDeMotos(int numeroDeMotos) {
+        this.numeroDeMotos = numeroDeMotos;
+    }
+
+    public int getNumeroDeAuto() {
+        return numeroDeAuto;
+    }
+
+    public void setNumeroDeAuto(int numeroDeAuto) {
+        this.numeroDeAuto = numeroDeAuto;
+    }
+
+    public int getNumeroDeBusetas() {
+        return numeroDeBusetas;
+    }
+
+    public void setNumeroDeBusetas(int numeroDeBusetas) {
+        this.numeroDeBusetas = numeroDeBusetas;
     }
 
     public boolean isOpcionSeleccionado() {
@@ -137,8 +229,9 @@ public class BeanParqueadero implements Serializable {
         tipoVehiculoSeleccionado = 0;
         opcionSeleccionado = true;
         numeroDeAsientos = 5;
+        numeroDeToneladas = 6;
     }
-   
+
     //true es: SI false es: NO
     public void verificarDatosVacios() { // Creo metodo que valida si es 0, deshabilite la informacion que requiero
         if (listaVehiculos.contarNodos() == 0) {
@@ -178,6 +271,10 @@ public class BeanParqueadero implements Serializable {
             tipoVehiculoSeleccionado = 3;
             Buseta buseta = (Buseta) nodoMostrar.getDato();
             numeroDeAsientos = buseta.getNuemroAsientos();
+        } else if (nodoMostrar.getDato() instanceof Volqueta) {
+            tipoVehiculoSeleccionado = 4;
+            Volqueta volqueta = (Volqueta) nodoMostrar.getDato();
+            numeroDeToneladas = volqueta.getCantidadToneladas();
         }
     }
 
@@ -223,13 +320,16 @@ public class BeanParqueadero implements Serializable {
         Vehiculo vehiculo = null;
         switch (tipoVehiculoSeleccionado) {
             case 1:
-                vehiculo = new Moto(opcionSeleccionado, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada());
+                vehiculo = new Moto(opcionSeleccionado, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada(), nodoMostrar.getDato().getCiudad());
                 break;
             case 2:
-                vehiculo = new Automovil(opcionSeleccionado, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada());
+                vehiculo = new Automovil(opcionSeleccionado, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada(), nodoMostrar.getDato().getCiudad());
                 break;
             case 3:
-                vehiculo = new Buseta(numeroDeAsientos, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada());
+                vehiculo = new Buseta(numeroDeAsientos, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada(), nodoMostrar.getDato().getCiudad());
+                break;
+            case 4:
+                vehiculo = new Volqueta(numeroDeToneladas, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada(), nodoMostrar.getDato().getCiudad());
                 break;
         }
         listaVehiculos.adicionarNodoAlFinal(vehiculo);//Adiciono en lista
@@ -281,13 +381,54 @@ public class BeanParqueadero implements Serializable {
         irAlPrimero();
     }
 
+    public void vehiculosEnMemoria() {
+        numeroDeNodos = listaVehiculos.contarNodos();
+        numeroDeMotos = listaVehiculos.numerosDeMoto();
+        numeroDeAuto = listaVehiculos.numerosDeAutomovil();
+        numeroDeBusetas = listaVehiculos.numerosDeBuses();
+        numeroDeVolquetas = listaVehiculos.numerosDeVolquetas();
+    }
+
+    public int busquedaDeAutos() {
+        switch (tipoVehiculoBuscado) {
+            case 1:
+                numeroDeMotos = listaVehiculos.numerosDeMoto();
+                valorQueIndicaLaSElleccion = numeroDeMotos;
+                break;
+            case 2:
+                numeroDeAuto = listaVehiculos.numerosDeAutomovil();
+                valorQueIndicaLaSElleccion = numeroDeAuto;
+                break;
+            case 3:
+                numeroDeBusetas = listaVehiculos.numerosDeBuses();
+                valorQueIndicaLaSElleccion = numeroDeBusetas;
+                break;
+            case 4:
+                numeroDeVolquetas = listaVehiculos.numerosDeVolquetas();
+                valorQueIndicaLaSElleccion = numeroDeVolquetas;
+                break;
+            default:
+                tipoVehiculoBuscado = 0;
+                valorQueIndicaLaSElleccion = 0;
+                break;
+        }
+        return valorQueIndicaLaSElleccion;
+    }
+
+    public void buscarPorCiudad() {
+        numeroDeCiudadesContadas = listaVehiculos.buscarCiudadPorCiudad(getCiudadSeleccionada());
+    }
+
+//===================================================Diagrama PrimeFaces=======================================
     @PostConstruct//para despues que se ins se llame este objeto
     public void llenarVehiculos() {
-        listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "1NAE033", new Date()));
-        listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "2TVL03D", new Date()));
-        listaVehiculos.adicionarNodoAlFinal(new Moto(false, "3NAC995", new Date()));
-        listaVehiculos.adicionarNodoAlFinal(new Buseta((byte) 30, "4SAN123", new Date()));
-//        listaVehiculos.adicionarNodoAlFinal(new Vehiculo("5MAT201", new Date()));
+        listaVehiculos.adicionarNodoAlFinal(new Buseta((byte) 30, "1SAN123", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoAlFinal(new Moto(true, "2TVL03D", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoAlFinal(new Moto(false, "3NAC995", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "4NAE033", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoAlFinal(new Volqueta((byte) 9, "5DFG033", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoAlFinal(new Volqueta((byte) 18, "6GHJ033", new Date(), "manizales"));
+////        listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "5NAE033", new Date()));
         irAlPrimero();
     }
 
@@ -319,7 +460,7 @@ public class BeanParqueadero implements Serializable {
         return model;
     }
 
-    public void crearNodoDiagrama(int pos, Nodo nodo) {
+    private void crearNodoDiagrama(int pos, Nodo nodo) {
         int cont = pos * 5;
         String horizontal = Integer.toString(cont) + "em";
         String verticar = Integer.toString(cont) + "em";
@@ -332,7 +473,7 @@ public class BeanParqueadero implements Serializable {
         model.connect(new Connection(model.getElements().get(pos - 2).getEndPoints().get(1), nuevoVehiculo.getEndPoints().get(0)));
     }
 
-    public void crearPrimerNodoDiagrama(int pos, Nodo nodo) {
+    private void crearPrimerNodoDiagrama(int pos, Nodo nodo) {
         int cont = 4;
         String horizontal = Integer.toString(cont) + "em";
         String verticar = Integer.toString(cont) + "em";
