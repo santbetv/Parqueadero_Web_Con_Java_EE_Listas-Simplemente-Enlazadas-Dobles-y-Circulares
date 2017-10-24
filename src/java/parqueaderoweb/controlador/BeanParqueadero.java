@@ -42,7 +42,6 @@ public class BeanParqueadero implements Serializable {
     private int numeroDeBusetas; //Variable que captura el numero de busetas totales de LIstaSE
     private int numeroDeVolquetas; //Variable que captura el numero de volquetas totales de LIstaSE
     private int numeroDeNodos; //Variable que captura el numero de Nodos totales de LIstaSE
-    int valorQueIndicaLaSElleccion = 0; //Variable que captura el numero seleccionado en selectOneMenu, buscar vehiculo
     //============================================================================
     int numeroDeCiudadesContadas = 0; //Variable que toma el numero total de ciudades contadas
     private String ciudadSeleccionada = ""; //Variable que toma la ciudad digitada por pantalla web
@@ -50,7 +49,8 @@ public class BeanParqueadero implements Serializable {
     private boolean deshabilitarBtnIrAlPrimero = false;//Indica en primera instancia que esta deshabilitado el boton 
     private boolean deshabilitarBtnIrAlSiguiente = false;//Indica en primera instancia que esta deshabilitado el boton 
     private boolean deshabilitarBtnIrAlUltimo = false;//Indica en primera instancia que esta deshabilitado el boton 
-    private boolean deshabilitarInvertirLista = false;//Indica en primera instancia que esta deshabilitado el boton 
+    private boolean deshabilitarInvertirLista = false;//Indica en primera instancia que esta deshabilitado el boton
+    //===============================================================================
 
     public BeanParqueadero() {
     }
@@ -69,14 +69,6 @@ public class BeanParqueadero implements Serializable {
 
     public void setNumeroDeToneladas(byte numeroDeToneladas) {
         this.numeroDeToneladas = numeroDeToneladas;
-    }
-
-    public int getValorQueIndicaLaSElleccion() {
-        return valorQueIndicaLaSElleccion;
-    }
-
-    public void setValorQueIndicaLaSElleccion(int valorQueIndicaLaSElleccion) {
-        this.valorQueIndicaLaSElleccion = valorQueIndicaLaSElleccion;
     }
 
     public int getNumeroDeCiudadesContadas() {
@@ -239,6 +231,7 @@ public class BeanParqueadero implements Serializable {
             deshabilitarBtnIrAlSiguiente = true;
             deshabilitarBtnIrAlUltimo = true;
             deshabilitarInvertirLista = true;
+
         }
     }
 
@@ -390,6 +383,7 @@ public class BeanParqueadero implements Serializable {
     }
 
     public int busquedaDeAutos() {
+        int valorQueIndicaLaSElleccion = 0; //Variable que captura el numero seleccionado en selectOneMenu, buscar vehiculo
         switch (tipoVehiculoBuscado) {
             case 1:
                 numeroDeMotos = listaVehiculos.numerosDeMoto();
@@ -419,7 +413,43 @@ public class BeanParqueadero implements Serializable {
         numeroDeCiudadesContadas = listaVehiculos.buscarCiudadPorCiudad(getCiudadSeleccionada());
     }
 
-//===================================================Diagrama PrimeFaces=======================================
+    private boolean deshabilitarEliminarPorCabeza = false;//Indica en primera instancia que esta deshabilitado el boton 
+    private boolean deshabilitarEliminarPorUltimo = false;//Indica en primera instancia que esta deshabilitado el boton 
+
+    public boolean isDeshabilitarEliminarPorUltimo() {
+        return deshabilitarEliminarPorUltimo;
+    }
+
+    public void setDeshabilitarEliminarPorUltimo(boolean deshabilitarEliminarPorUltimo) {
+        this.deshabilitarEliminarPorUltimo = deshabilitarEliminarPorUltimo;
+    }
+
+    public boolean isDeshabilitarEliminarPorCabeza() {
+        return deshabilitarEliminarPorCabeza;
+    }
+
+    public void setDeshabilitarEliminarPorCabeza(boolean deshabilitarEliminarPorCabeza) {
+        this.deshabilitarEliminarPorCabeza = deshabilitarEliminarPorCabeza;
+    }
+
+    public void eliminarPorCabe() {
+        deshabilitarEliminarPorCabeza = true;
+    }
+
+    public void eliminarPorUlti() {
+        deshabilitarEliminarPorUltimo = true;
+    }
+
+    public void eliminarCabeza() {
+        listaVehiculos.eliminarCabeza();
+        irAlSguiente();
+    }
+
+    public void eliminarUltimoDeLaLista() {
+        nodoMostrar = listaVehiculos.eliminarUltimoDelaLista();
+        listaVehiculos.eliminarNodo(nodoMostrar.getDato());
+    }
+
     @PostConstruct//para despues que se ins se llame este objeto
     public void llenarVehiculos() {
         listaVehiculos.adicionarNodoAlFinal(new Buseta((byte) 30, "1SAN123", new Date(), "manizales"));
@@ -431,6 +461,7 @@ public class BeanParqueadero implements Serializable {
 ////        listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "5NAE033", new Date()));
         irAlPrimero();
     }
+//===================================================Diagrama PrimeFaces=======================================
 
     public void init() {
         model = new DefaultDiagramModel();
