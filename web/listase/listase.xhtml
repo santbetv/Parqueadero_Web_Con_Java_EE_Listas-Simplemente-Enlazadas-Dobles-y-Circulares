@@ -7,138 +7,146 @@
     <h:head>
 
         <title>#{bundle.titulo}</title>
+        <style type="text/css">
+            .ui-diagram-element {
+                border:0.1em dotted #B22222;
+                border-radius: 100px;
+                background: #00FFFF;
+                color: red;
+                width:14em; 
+                height:4em;     
+                line-height:4em;
+                text-align: center;
+            }
+        </style>
     </h:head>
     <h:body>
         <h:form>
             <p:growl id="pnlErrores"/>
+            <p:panel header="#{bundle.titulo} #{beanParqueadero.listaVehiculos.contarNodos()} #{beanParqueadero.verificarDatosVacios()} #{beanParqueadero.verificarDatosConUnDato()} #{beanParqueadero.deshabilitarDatosConElUltimo()} #{beanParqueadero.vehiculosEnMemoria()} #{beanParqueadero.init()} #{beanParqueadero.inicializarGraficoCircular()} #{beanParqueadero.inicializarBarras()}" id="pnlDatosVehiculo">
+                <p:commandButton value="Habilitar panel, Deshabilitar digrama" update="pnlDatosVehiculo" action="#{beanParqueadero.existirPanelMayor()}"/>
+                <p:commandButton value="Habilitar diagrama, Deshabilitar panel" update="pnlDatosVehiculo" action="#{beanParqueadero.existirDiagrama()}"/>
+                <p:commandButton value="Habilitar los dos" update="pnlDatosVehiculo" action="#{beanParqueadero.existirPanelYDiagrama()}"/>
 
-            <p:panel header="#{bundle.titulo} #{beanParqueadero.listaVehiculos.contarNodos()} #{beanParqueadero.verificarDatosVacios()} #{beanParqueadero.verificarDatosConUnDato()} #{beanParqueadero.deshabilitarDatosConElUltimo()} #{beanParqueadero.init()} #{beanParqueadero.vehiculosEnMemoria()}" id="pnlDatosVehiculo" >
+                <p:panel header="Ingreso de datos principales" rendered="#{!beanParqueadero.deshabilitarPanel}">
+                    <p:panel >
+                        <p:panelGrid columns="2" >
+                            <p:outputLabel for="psoTipVeh" value="#{bundle.tipoDeVehiculo}"/>
+                            <p:selectOneMenu id="psoTipVeh" required="true" value="#{beanParqueadero.tipoVehiculoSeleccionado}" disabled="#{beanParqueadero.deshabilitarNuevo}" style="width: 190px;">
+                                <f:selectItem itemValue="0" itemLabel="Seleccione uno .." itemEscaped="true"/>
+                                <f:selectItem itemValue="1" itemLabel="#{bundle.moto}"/>
+                                <f:selectItem itemValue="2" itemLabel="#{bundle.automovil}"/>
+                                <f:selectItem itemValue="3" itemLabel="#{bundle.buseta}"/>
+                                <f:selectItem itemValue="4" itemLabel="Volqueta"/>
+                                <p:ajax event="change" update="pnlDatosVehiculo"/>
 
-                <p:panel header="Ingreso de datos principales">
-                    <p:panelGrid columns="2" >
-                        <p:outputLabel for="psoTipVeh" value="#{bundle.tipoDeVehiculo}"/>
-                        <p:selectOneMenu id="psoTipVeh" required="true" value="#{beanParqueadero.tipoVehiculoSeleccionado}" disabled="#{beanParqueadero.deshabilitarNuevo}" style="width: 190px;">
-                            <f:selectItem itemValue="0" itemLabel="Seleccione uno .." itemEscaped="true"/>
-                            <f:selectItem itemValue="1" itemLabel="#{bundle.moto}"/>
-                            <f:selectItem itemValue="2" itemLabel="#{bundle.automovil}"/>
-                            <f:selectItem itemValue="3" itemLabel="#{bundle.buseta}"/>
-                            <f:selectItem itemValue="4" itemLabel="Volqueta"/>
-                            <p:ajax event="change" update="pnlDatosVehiculo"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel for="pitPlaca" value="#{bundle.placa}"/>
+                            <p:inputText id="pitPlaca" required="true" disabled="#{beanParqueadero.deshabilitarNuevo or beanParqueadero.tipoVehiculoSeleccionado==0}" value="#{beanParqueadero.nodoMostrar.dato.placa}" maxlength="6"/>
+                            <p:outputLabel for="pitCiudad" value="Ciudad"/>
+                            <p:inputText id="pitCiudad" required="true" disabled="#{beanParqueadero.deshabilitarNuevo or beanParqueadero.tipoVehiculoSeleccionado==0}" value="#{beanParqueadero.nodoMostrar.dato.ciudad}"/>
+                            <p:outputLabel for="calFechaIngreso" value="#{bundle.fechaDeIngreso}"/>
+                            <p:calendar id="calFechaIngreso" required="true" disabled="#{beanParqueadero.deshabilitarNuevo or beanParqueadero.tipoVehiculoSeleccionado==0}" showOn="button" readonlyInput="true" pattern="MM/dd/yyyy HH:mm:ss" value="#{beanParqueadero.nodoMostrar.dato.fechaHoraEntrada}"/>
+                            <p:outputLabel value="#{bundle.fechaDeSalida}"/>
+                            <p:calendar  disabled="#{beanParqueadero.deshabilitarNuevo or beanParqueadero.tipoVehiculoSeleccionado==0}" showOn="button" readonlyInput="true" pattern="MM/dd/yyyy HH:mm:ss" value="#{beanParqueadero.nodoMostrar.dato.fechaHoraSalida}"/>
+                            <p:commandButton value="#{bundle.btnElimivarXPosicion}" update="pnlDatosVehiculo,pnlErrores"  rendered="#{beanParqueadero.listaVehiculos.cabeza!=null}" action="#{beanParqueadero.eliminiarXPosicion()}">
+                                <p:inputText value="#{beanParqueadero.posicionQueSeraEliminada}" style="width: 20px"/>
+                            </p:commandButton>
+                        </p:panelGrid>
 
-                        </p:selectOneMenu>
-                        <p:outputLabel for="pitPlaca" value="#{bundle.placa}"/>
-                        <p:inputText id="pitPlaca" required="true" disabled="#{beanParqueadero.deshabilitarNuevo or beanParqueadero.tipoVehiculoSeleccionado==0}" value="#{beanParqueadero.nodoMostrar.dato.placa}" maxlength="6"/>
-                        <p:outputLabel value="Ciudad"/>
-                        <p:inputText required="true" disabled="#{beanParqueadero.deshabilitarNuevo or beanParqueadero.tipoVehiculoSeleccionado==0}" value="#{beanParqueadero.nodoMostrar.dato.ciudad}"/>
-                        <p:outputLabel for="calFechaIngreso" value="#{bundle.fechaDeIngreso}"/>
-                        <p:calendar id="calFechaIngreso" required="true" disabled="#{beanParqueadero.deshabilitarNuevo or beanParqueadero.tipoVehiculoSeleccionado==0}" showOn="button" readonlyInput="true" pattern="MM/dd/yyyy HH:mm:ss" value="#{beanParqueadero.nodoMostrar.dato.fechaHoraEntrada}"/>
-                        <p:outputLabel value="#{bundle.fechaDeSalida}"/>
-                        <p:calendar  disabled="#{beanParqueadero.deshabilitarNuevo or beanParqueadero.tipoVehiculoSeleccionado==0}" showOn="button" readonlyInput="true" pattern="MM/dd/yyyy HH:mm:ss" value="#{beanParqueadero.nodoMostrar.dato.fechaHoraSalida}"/>
-                        <p:commandButton value="#{bundle.btnElimivarXPosicion}" update="pnlDatosVehiculo"  rendered="#{beanParqueadero.listaVehiculos.cabeza!=null}" action="#{beanParqueadero.eliminiarXPosicion()}">
-                            <p:inputText     value="#{beanParqueadero.posicionQueSeraEliminada}" style="width: 20px"/>
+                        <p:panelGrid columns="2" >
+                            <p:outputLabel for="pitValorPagar"  value="#{bundle.valorApagar}"/>
+                            <p:inputText id="pitValorPagar" disabled="#{beanParqueadero.deshabilitarNuevo}" value="#{beanParqueadero.nodoMostrar.dato.valorAPagar}" >
+                                <f:validateDoubleRange minimum= "0" /><!--Desde que rango esta funcion-->
+                            </p:inputText>
+                            <p:outputLabel value="#{bundle.casco}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==1}"/>
+                            <p:selectBooleanCheckbox value="#{beanParqueadero.opcionSeleccionado}" disabled="#{beanParqueadero.deshabilitarNuevo}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==1}"/>
+                            <p:outputLabel value="#{bundle.pasacintas}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==2}"/>
+                            <p:selectBooleanCheckbox  value="#{beanParqueadero.opcionSeleccionado}" disabled="#{beanParqueadero.deshabilitarNuevo}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==2}"/>
+                            <p:outputLabel value="#{bundle.numeroDeAsientos}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==3}"/>
+                            <p:spinner value="#{beanParqueadero.numeroDeAsientos}" min="5" max="40" disabled="#{beanParqueadero.deshabilitarNuevo}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==3}"/>
+                            <p:outputLabel value="Numero de toneladas" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==4}"/>
+                            <p:spinner value="#{beanParqueadero.numeroDeToneladas}" min="6" max="30" disabled="#{beanParqueadero.deshabilitarNuevo}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==4}"/>
+                        </p:panelGrid>
+                    </p:panel>
+
+                    <p:panel header="Botones de funciones">
+                        <h:panelGroup layout="block">
+                            <p:commandButton value="#{bundle.btnPrimero}" update="pnlDatosVehiculo" action="#{beanParqueadero.irAlPrimero()}" rendered="#{!beanParqueadero.deshabilitarBtnIrAlPrimero}"/>
+                            <p:commandButton value="#{bundle.btnSiguiente}" update="pnlDatosVehiculo" action="#{beanParqueadero.irAlSguiente()}" rendered="#{!beanParqueadero.deshabilitarBtnIrAlSiguiente}"/>
+                            <p:commandButton value="#{bundle.btnUltimo}" update="pnlDatosVehiculo" action="#{beanParqueadero.irAlUltimo()}" rendered="#{!beanParqueadero.deshabilitarBtnIrAlUltimo}"/>
+                            <p:commandButton value="#{bundle.btnNuevo}" update="pnlDatosVehiculo" action="#{beanParqueadero.habilitarGuardado()}" rendered="#{beanParqueadero.deshabilitarNuevo}"/>
+                            <p:commandButton value="#{bundle.btnGuardar}" update="pnlDatosVehiculo,pnlErrores" rendered="#{!beanParqueadero.deshabilitarNuevo and beanParqueadero.tipoVehiculoSeleccionado!=0}" action="#{beanParqueadero.guardarVehiculo()}"/>
+                            <p:commandButton value="#{bundle.btnGuardarAlInicio}" update="pnlDatosVehiculo,pnlErrores" rendered="#{!beanParqueadero.deshabilitarNuevo and beanParqueadero.tipoVehiculoSeleccionado!=0}" action="#{beanParqueadero.guarfarVehiculoAlInicio()}"/>
+                            <p:commandButton value="#{bundle.btnInvertir}" update="pnlDatosVehiculo,pnlErrores"  action="#{beanParqueadero.invertir()}" rendered="#{!beanParqueadero.deshabilitarInvertirLista}"/>
+                            <p:commandButton value="#{bundle.btnEliminar}" update="pnlDatosVehiculo,pnlErrores"  rendered="#{beanParqueadero.listaVehiculos.cabeza!=null}" action="#{beanParqueadero.eliminarVehiculo()}" />
+                            <p:commandButton value="#{bundle.eliminarPosicionesImpares}" update="pnlDatosVehiculo,pnlErrores" action="#{beanParqueadero.metodoQueEliminaPosicionesImpares()}"/>
+                            <p:commandButton value="#{bundle.invertirUltimoConElprimero}" update="pnlDatosVehiculo,pnlErrores" action="#{beanParqueadero.metodoQueInvierteUltimoEnELPrimero()}"/>
+                            <p:commandButton value="#{bundle.invertirNodosInternos}" update="pnlDatosVehiculo,pnlErrores" action="#{beanParqueadero.mostrarNodosInternos()}"/>
+
+                        </h:panelGroup>
+                    </p:panel>
+
+                    <p:panel header="Eliminar por cabeza">
+                        <p:commandButton value="Eliminar Cabeza Con Intervalos" update="pnlDatosVehiculo,pnlErrores" action="#{beanParqueadero.eliminarPorCabe()}">
+                            <p:poll   interval="4" listener="#{beanParqueadero.eliminarCabeza()}" update="pnlDatosVehiculo" autoStart="#{beanParqueadero.deshabilitarEliminarPorCabeza}" stop="#{beanParqueadero.listaVehiculos.contarNodos()==0}"/>
                         </p:commandButton>
-                    </p:panelGrid>
+                    </p:panel>
 
-                    <p:panelGrid columns="2" >
-                        <p:outputLabel for="pitValorPagar"  value="#{bundle.valorApagar}"/>
-                        <p:inputText id="pitValorPagar" disabled="#{beanParqueadero.deshabilitarNuevo}" value="#{beanParqueadero.nodoMostrar.dato.valorAPagar}" >
-                            <f:validateDoubleRange minimum= "0" /><!--Desde que rango esta funcion-->
-                        </p:inputText>
-                        <p:outputLabel value="#{bundle.casco}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==1}"/>
-                        <p:selectBooleanCheckbox value="#{beanParqueadero.opcionSeleccionado}" disabled="#{beanParqueadero.deshabilitarNuevo}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==1}"/>
-                        <p:outputLabel value="#{bundle.pasacintas}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==2}"/>
-                        <p:selectBooleanCheckbox  value="#{beanParqueadero.opcionSeleccionado}" disabled="#{beanParqueadero.deshabilitarNuevo}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==2}"/>
-                        <p:outputLabel value="#{bundle.numeroDeAsientos}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==3}"/>
-                        <p:spinner value="#{beanParqueadero.numeroDeAsientos}" min="5" max="40" disabled="#{beanParqueadero.deshabilitarNuevo}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==3}"/>
-                        <p:outputLabel value="Numero de toneladas" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==4}"/>
-                        <p:spinner value="#{beanParqueadero.numeroDeToneladas}" min="6" max="30" disabled="#{beanParqueadero.deshabilitarNuevo}" rendered="#{beanParqueadero.tipoVehiculoSeleccionado==4}"/>
-                    </p:panelGrid>
+                    <p:panel header="Eliminar por Ultimo Nodo">
+                        <p:commandButton value="Eliminar Ultimo Con Intervalos" update="pnlDatosVehiculo,pnlErrores" action="#{beanParqueadero.eliminarPorUlti()}">
+                            <p:poll   interval="4" listener="#{beanParqueadero.eliminarUltimoDeLaLista()}" update="pnlDatosVehiculo" autoStart="#{beanParqueadero.deshabilitarEliminarPorUltimo}" stop="#{beanParqueadero.listaVehiculos.contarNodos()==0}"/>
+                        </p:commandButton>
+                    </p:panel>
+
+                    <p:panel header="Informe por tipo de vehiculo">
+                        <p:panelGrid columns="2" >
+                            <p:outputLabel value="Tipo De Vehiculo"/>
+                            <p:outputLabel value="Cantiadad"/>
+                            <p:outputLabel value="Moto: "/>
+                            <p:inputText disabled="true" value="#{beanParqueadero.numeroDeMotos}"/>
+                            <p:outputLabel value="Automovil: "/>
+                            <p:inputText disabled="true" value="#{beanParqueadero.numeroDeAuto}"/>
+                            <p:outputLabel value="Buseta: "/>
+                            <p:inputText disabled="true" value="#{beanParqueadero.numeroDeBusetas}"/>
+                            <p:outputLabel value="Volqueta: "/>
+                            <p:inputText disabled="true" value="#{beanParqueadero.numeroDeVolquetas}"/>
+                            <p:outputLabel value="Total Vehiculos: "/>
+                            <p:inputText disabled="true" value="#{beanParqueadero.numeroDeNodos}"/>
+                        </p:panelGrid>
+                    </p:panel>
+
+                    <p:panel header="Buscar solo por tipo de vehiculo ">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel  value="#{bundle.tipoDeVehiculo}"/>
+                            <p:selectOneMenu required="true" value="#{beanParqueadero.tipoVehiculoBuscado}"   style="width: 190px;">
+                                <f:selectItem itemValue="0" itemLabel="Seleccione uno .." itemEscaped="true"/>
+                                <f:selectItem itemValue="1" itemLabel="#{bundle.moto}"/>
+                                <f:selectItem itemValue="2" itemLabel="#{bundle.automovil}"/>
+                                <f:selectItem itemValue="3" itemLabel="#{bundle.buseta}"/>
+                                <f:selectItem itemValue="4" itemLabel="Volqueta"/>
+                                <p:ajax event="change" update="pnlDatosVehiculo"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel value="Cantiadad buscada por vehiculo: "/>
+                            <p:inputText disabled="true" value="#{beanParqueadero.busquedaDeAutos()}"/>
+                        </p:panelGrid>
+                    </p:panel>
+
+                    <p:panel header="Contar vehiculos por ciudad">
+                        <p:panelGrid columns="2" >
+                            <p:outputLabel value="Ciudad Que Desea Buscar"/>
+                            <p:inputText value="#{beanParqueadero.ciudadSeleccionada}"/>
+                            <p:commandButton value="Buscar" update="pnlDatosVehiculo,pnlErrores" action="#{beanParqueadero.buscarPorCiudad()}"/>
+                            <p:inputText disabled="true" value="#{beanParqueadero.numeroDeCiudadesContadas}"/>
+                        </p:panelGrid>
+                    </p:panel>
                 </p:panel>
 
-                <p:panel header="Botones de funciones">
-                    <h:panelGroup layout="block">
-                        <p:commandButton value="#{bundle.btnPrimero}" update="pnlDatosVehiculo" action="#{beanParqueadero.irAlPrimero()}" rendered="#{!beanParqueadero.deshabilitarBtnIrAlPrimero}"/>
-                        <p:commandButton value="#{bundle.btnSiguiente}" update="pnlDatosVehiculo" action="#{beanParqueadero.irAlSguiente()}" rendered="#{!beanParqueadero.deshabilitarBtnIrAlSiguiente}"/>
-                        <p:commandButton value="#{bundle.btnUltimo}" update="pnlDatosVehiculo" action="#{beanParqueadero.irAlUltimo()}" rendered="#{!beanParqueadero.deshabilitarBtnIrAlUltimo}"/>
-                        <p:commandButton value="#{bundle.btnNuevo}" update="pnlDatosVehiculo" action="#{beanParqueadero.habilitarGuardado()}" rendered="#{beanParqueadero.deshabilitarNuevo}"/>
-                        <p:commandButton value="#{bundle.btnGuardar}" update="pnlDatosVehiculo,pnlErrores" rendered="#{!beanParqueadero.deshabilitarNuevo and beanParqueadero.tipoVehiculoSeleccionado!=0}" action="#{beanParqueadero.guardarVehiculo()}"/>
-                        <p:commandButton value="#{bundle.btnGuardarAlInicio}" update="pnlDatosVehiculo,pnlErrores" rendered="#{!beanParqueadero.deshabilitarNuevo and beanParqueadero.tipoVehiculoSeleccionado!=0}" action="#{beanParqueadero.guarfarVehiculoAlInicio()}"/>
-                        <p:commandButton value="#{bundle.btnInvertir}" update="pnlDatosVehiculo"  action="#{beanParqueadero.invertir()}" rendered="#{!beanParqueadero.deshabilitarInvertirLista}"/>
-                        <p:commandButton value="#{bundle.btnEliminar}" update="pnlDatosVehiculo"  rendered="#{beanParqueadero.listaVehiculos.cabeza!=null}" action="#{beanParqueadero.eliminarVehiculo()}" />
-                        <p:commandButton value="#{bundle.eliminarPosicionesImpares}" update="pnlDatosVehiculo" action="#{beanParqueadero.metodoQueEliminaPosicionesImpares()}"/>
-                        <p:commandButton value="#{bundle.invertirUltimoConElprimero}" update="pnlDatosVehiculo" action="#{beanParqueadero.metodoQueInvierteUltimoEnELPrimero()}"/>
-                        <p:commandButton value="#{bundle.invertirNodosInternos}" update="pnlDatosVehiculo" action="#{beanParqueadero.mostrarNodosInternos()}"/>
-                    </h:panelGroup>
-                </p:panel>
-
-                <p:panel header="Eliminar por cabeza">
-                    <p:commandButton value="Eliminar Cabeza Con Intervalos" update="pnlDatosVehiculo" action="#{beanParqueadero.eliminarPorCabe()}">
-                        <p:poll   interval="4" listener="#{beanParqueadero.eliminarCabeza()}" update="pnlDatosVehiculo" autoStart="#{beanParqueadero.deshabilitarEliminarPorCabeza}" stop="#{beanParqueadero.listaVehiculos.contarNodos()==0}"/>
-                    </p:commandButton>
-                </p:panel>
-
-                <p:panel header="Eliminar por Ultimo Nodo">
-                    <p:commandButton value="Eliminar Ultimo Con Intervalos" update="pnlDatosVehiculo" action="#{beanParqueadero.eliminarPorUlti()}">
-                        <p:poll   interval="4" listener="#{beanParqueadero.eliminarUltimoDeLaLista()}" update="pnlDatosVehiculo" autoStart="#{beanParqueadero.deshabilitarEliminarPorUltimo}" stop="#{beanParqueadero.listaVehiculos.contarNodos()==0}"/>
-                    </p:commandButton>
-                </p:panel>
-
-                <p:panel header="Informe por tipo de vehiculo">
-                    <p:panelGrid columns="2" >
-                        <p:outputLabel value="Tipo De Vehiculo"/>
-                        <p:outputLabel value="Cantiadad"/>
-                        <p:outputLabel value="Moto: "/>
-                        <p:inputText disabled="true" value="#{beanParqueadero.numeroDeMotos}"/>
-                        <p:outputLabel value="Automovil: "/>
-                        <p:inputText disabled="true" value="#{beanParqueadero.numeroDeAuto}"/>
-                        <p:outputLabel value="Buseta: "/>
-                        <p:inputText disabled="true" value="#{beanParqueadero.numeroDeBusetas}"/>
-                        <p:outputLabel value="Volqueta: "/>
-                        <p:inputText disabled="true" value="#{beanParqueadero.numeroDeVolquetas}"/>
-                        <p:outputLabel value="Total Vehiculos: "/>
-                        <p:inputText disabled="true" value="#{beanParqueadero.numeroDeNodos}"/>
-                    </p:panelGrid>
-                </p:panel>
-
-                <p:panel header="Buscar solo por tipo de vehiculo ">
-                    <p:panelGrid columns="2">
-                        <p:outputLabel  value="#{bundle.tipoDeVehiculo}"/>
-                        <p:selectOneMenu required="true" value="#{beanParqueadero.tipoVehiculoBuscado}"   style="width: 190px;">
-                            <f:selectItem itemValue="0" itemLabel="Seleccione uno .." itemEscaped="true"/>
-                            <f:selectItem itemValue="1" itemLabel="#{bundle.moto}"/>
-                            <f:selectItem itemValue="2" itemLabel="#{bundle.automovil}"/>
-                            <f:selectItem itemValue="3" itemLabel="#{bundle.buseta}"/>
-                            <f:selectItem itemValue="4" itemLabel="Volqueta"/>
-                            <p:ajax event="change" update="pnlDatosVehiculo"/>
-                        </p:selectOneMenu>
-                        <p:outputLabel value="Cantiadad buscada por vehiculo: "/>
-                        <p:inputText disabled="true" value="#{beanParqueadero.busquedaDeAutos()}"/>
-                    </p:panelGrid>
-                </p:panel>
-
-                <p:panel header="Contar vehiculos por ciudad">
-                    <p:panelGrid columns="2" >
-                        <p:outputLabel value="Ciudad Que Desea Buscar"/>
-                        <p:inputText value="#{beanParqueadero.ciudadSeleccionada}"/>
-                        <p:commandButton value="Buscar" update="pnlDatosVehiculo" action="#{beanParqueadero.buscarPorCiudad()}"/>
-                        <p:inputText disabled="true" value="#{beanParqueadero.numeroDeCiudadesContadas}"/>
-                    </p:panelGrid>
-                </p:panel>
-
-                <p:panel header="Diagrama de funciones en LSE">
+                <p:panel header="Diagrama de funciones en LSE" rendered="#{!beanParqueadero.deshabilitarDiagrama}">
                     <p:diagram value="#{beanParqueadero.model}" style="height:500px; width: 900px" styleClass="ui-widget-content" />
-                    <style type="text/css">
-                        .ui-diagram-element {
-                            border:0.1em dotted #B22222;
-                            border-radius: 100px;
-                            background: #00FFFF;
-                            color: red;
-                            width:14em; 
-                            height:4em;     
-                            line-height:4em;
-                            text-align: center;
-                        }
-                    </style>
+                    <p:chart type="pie" model="#{beanParqueadero.pieModel1}" style="width:400px;height:300px" />
+                    <p:chart type="pie" model="#{beanParqueadero.pieModel2}" style="width:400px;height:300px" />
+                    <p:chart type="bar" model="#{beanParqueadero.barModel}" style="height:300px"/>
                 </p:panel>
             </p:panel>
         </h:form>

@@ -1,29 +1,24 @@
 package parqueaderoweb.controlador;
 
-import org.primefaces.model.chart.Axis;
-import org.primefaces.model.chart.AxisType;
-import org.primefaces.model.chart.ChartSeries;
-
 import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import org.primefaces.model.chart.BarChartModel;
-import org.primefaces.model.chart.HorizontalBarChartModel;
-import org.primefaces.model.chart.PieChartModel;
 import org.primefaces.model.diagram.Connection;
 import org.primefaces.model.diagram.DefaultDiagramModel;
 import org.primefaces.model.diagram.DiagramModel;
 import org.primefaces.model.diagram.Element;
 import org.primefaces.model.diagram.endpoint.DotEndPoint;
 import org.primefaces.model.diagram.endpoint.EndPointAnchor;
-import parqueadero.Controlador.ListaSE;
+import parqueadero.Controlador.ListaDE;
 import parqueadero.Controlador.exepciones.ParqueaderoExepcion;
 import parqueadero.Modelo.Automovil;
 import parqueadero.Modelo.Buseta;
 import parqueadero.Modelo.Moto;
-import parqueadero.Modelo.Nodo;
+import parqueadero.Modelo.NodoDE;
 import parqueadero.Modelo.Vehiculo;
 import parqueadero.Modelo.Volqueta;
 import parqueaderoweb.utilidades.JsfUtil;
@@ -32,15 +27,15 @@ import parqueaderoweb.utilidades.JsfUtil;
  *
  * @author Santiago Betancur Villegas <santiago-betancur at hotmail.com>
  */
-@Named(value = "beanParqueadero")
+@Named(value = "beanPaginaListaDE")
 @SessionScoped
-public class BeanParqueadero implements Serializable {
+public class BeanPaginaListaDE implements Serializable {
 
     private boolean deshabilitarNuevo = true; //Este atributo es para que se deshabilite los ImputText
     private int tipoVehiculoSeleccionado; //Indica el numero que selecciona en el selectOneMenu, tipo de vehiculo
     private int tipoVehiculoBuscado; //Indica el numero que selecciona en el selectOneMenu, tipo de vehiculo
-    private Nodo nodoMostrar = new Nodo(new Vehiculo()); //ayudante que toma los datos de la lista y me los va a mostrar en la paguina
-    private ListaSE listaVehiculos = new ListaSE(); // Voy a tener acceso a los metodos de listaSE
+    private NodoDE nodoMostrar = new NodoDE(new Vehiculo()); //ayudante que toma los datos de la lista y me los va a mostrar en la paguina
+    private ListaDE listaVehiculos = new ListaDE(); // Voy a tener acceso a los metodos de listaSE
     private int posicionQueSeraEliminada; //Variable que toma la posicion que requiero que se elimine
     private DefaultDiagramModel model;//Este es el diagrama que me permite ver la opciones en la web
     private boolean opcionSeleccionado;//Capturo el tipo de opcion seleccionada caso o pasaCintas
@@ -58,30 +53,21 @@ public class BeanParqueadero implements Serializable {
     private boolean deshabilitarBtnIrAlPrimero = false;//Indica en primera instancia que esta deshabilitado el boton 
     private boolean deshabilitarBtnIrAlSiguiente = false;//Indica en primera instancia que esta deshabilitado el boton 
     private boolean deshabilitarBtnIrAlUltimo = false;//Indica en primera instancia que esta deshabilitado el boton 
+    private boolean deshabilitarBtnIrAlAnterior = false;//Indica en primera instancia que esta deshabilitado el boton 
     private boolean deshabilitarInvertirLista = false;//Indica en primera instancia que esta deshabilitado el boton
     private boolean deshabilitarEliminarPorCabeza = false;//Indica en primera instancia que esta deshabilitado el boton 
     private boolean deshabilitarEliminarPorUltimo = false;//Indica en primera instancia que esta deshabilitado el boton 
-    private boolean deshabilitarDiagrama = false;//Indica en primera instancia que esta deshabilitado el boton 
-    private boolean deshabilitarPanel = false;//Indica en primera instancia que esta deshabilitado el boton
     //===============================================================================
 
-    public BeanParqueadero() {
+    public BeanPaginaListaDE() {
     }
 
-    public boolean isDeshabilitarDiagrama() {
-        return deshabilitarDiagrama;
+    public boolean isDeshabilitarBtnIrAlAnterior() {
+        return deshabilitarBtnIrAlAnterior;
     }
 
-    public void setDeshabilitarDiagrama(boolean deshabilitarDiagrama) {
-        this.deshabilitarDiagrama = deshabilitarDiagrama;
-    }
-
-    public boolean isDeshabilitarPanel() {
-        return deshabilitarPanel;
-    }
-
-    public void setDeshabilitarPanel(boolean deshabilitarPanel) {
-        this.deshabilitarPanel = deshabilitarPanel;
+    public void setDeshabilitarBtnIrAlAnterior(boolean deshabilitarBtnIrAlAnterior) {
+        this.deshabilitarBtnIrAlAnterior = deshabilitarBtnIrAlAnterior;
     }
 
     public boolean isDeshabilitarEliminarPorUltimo() {
@@ -228,19 +214,19 @@ public class BeanParqueadero implements Serializable {
         this.posicionQueSeraEliminada = posicionQueSeraEliminada;
     }
 
-    public ListaSE getListaVehiculos() {
+    public ListaDE getListaVehiculos() {
         return listaVehiculos;
     }
 
-    public void setListaVehiculos(ListaSE listaVehiculos) {
+    public void setListaVehiculos(ListaDE listaVehiculos) {
         this.listaVehiculos = listaVehiculos;
     }
 
-    public Nodo getNodoMostrar() {
+    public NodoDE getNodoMostrar() {
         return nodoMostrar;
     }
 
-    public void setNodoMostrar(Nodo nodoMostrar) {
+    public void setNodoMostrar(NodoDE nodoMostrar) {
         this.nodoMostrar = nodoMostrar;
     }
 
@@ -262,7 +248,7 @@ public class BeanParqueadero implements Serializable {
 
     public void habilitarGuardado() { //Llama al boton nuevo 
         deshabilitarNuevo = false;
-        nodoMostrar = new Nodo(new Vehiculo());
+        nodoMostrar = new NodoDE(new Vehiculo());
         tipoVehiculoSeleccionado = 0;
         opcionSeleccionado = true;
         numeroDeAsientos = 5;
@@ -370,39 +356,27 @@ public class BeanParqueadero implements Serializable {
                 vehiculo = new Volqueta(numeroDeToneladas, nodoMostrar.getDato().getPlaca(), nodoMostrar.getDato().getFechaHoraEntrada(), nodoMostrar.getDato().getCiudad());
                 break;
         }
-        try {
-            listaVehiculos.adicionarNodoAlFinal(vehiculo);//Adiciono en lista
-            deshabilitarNuevo = true;
-            tipoVehiculoSeleccionado = 0;
-            irAlPrimero();
-            JsfUtil.addSuccessMessage("Se ha adicionado con éxito");
-        } catch (ParqueaderoExepcion ex) {
-            JsfUtil.addErrorMessage(ex.getMessage());
-        }
+        listaVehiculos.adicionarNodoDEAlFinal(vehiculo);//Adiciono en lista
+        deshabilitarNuevo = true;
+        tipoVehiculoSeleccionado = 0;
+        irAlPrimero();
+        JsfUtil.addSuccessMessage("Se ha adicionado con éxito");
     }
 
     public void guarfarVehiculoAlInicio() {
-        try {
-            listaVehiculos.adicionarNodoAlInicio(nodoMostrar.getDato());
-            deshabilitarNuevo = true;
-            tipoVehiculoSeleccionado = 0;
-            irAlPrimero();
-            JsfUtil.addSuccessMessage("Se ha adicionado con éxito Al Inicio");
-        } catch (ParqueaderoExepcion ex) {
-            JsfUtil.addErrorMessage(ex.getMessage());
-        }
-
+        listaVehiculos.adicionarNodoDEAlInicio(nodoMostrar.getDato());
+        deshabilitarNuevo = true;
+        tipoVehiculoSeleccionado = 0;
+        irAlPrimero();
+        JsfUtil.addSuccessMessage("Se ha adicionado con éxito Al Inicio");
     }
 
     public void invertir() {
-        try {
-            listaVehiculos.invertirLista();
-            deshabilitarNuevo = true;
-            irAlPrimero();
-            JsfUtil.addSuccessMessage("Se ha Invertido con éxito");
-        } catch (ParqueaderoExepcion ex) {
-            JsfUtil.addErrorMessage(ex.getMessage());
-        }
+        listaVehiculos.invertirLista();
+        deshabilitarNuevo = true;
+        irAlPrimero();
+        JsfUtil.addSuccessMessage("Se ha Invertido con éxito");
+
     }
 
     public void eliminarVehiculo() {
@@ -420,15 +394,10 @@ public class BeanParqueadero implements Serializable {
     }
 
     public void metodoQueEliminaPosicionesImpares() {
-        try {
-            listaVehiculos.metodoQueEliminaPosicionesImpares();
-            deshabilitarNuevo = true;
-            irAlPrimero();
-            JsfUtil.addSuccessMessage("Se ha Eliminado Posiciones Impares éxito");
-        } catch (ParqueaderoExepcion ex) {
-            JsfUtil.addErrorMessage(ex.getMessage());
-        }
-
+        listaVehiculos.metodoQueEliminaPosicionesImpares();
+        deshabilitarNuevo = true;
+        irAlPrimero();
+        JsfUtil.addSuccessMessage("Se ha Eliminado Posiciones Impares éxito");
     }
 
     public void metodoQueInvierteUltimoEnELPrimero() {
@@ -503,41 +472,29 @@ public class BeanParqueadero implements Serializable {
         listaVehiculos.eliminarNodo(nodoMostrar.getDato());
     }
 
-    public void existirDiagrama() {//Metodo que me permite activar o desactivar panel o diagrama
-        deshabilitarPanel = true;
-        deshabilitarDiagrama = false;
-    }
-
-    public void existirPanelMayor() {//Metodo que me permite activar o desactivar panel o diagrama
-        deshabilitarDiagrama = true;
-        deshabilitarPanel = false;
-    }
-
-    public void existirPanelYDiagrama() {//Metodo que me permite activar o desactivar panel o diagrama
-        deshabilitarDiagrama = false;
-        deshabilitarPanel = false;
+    public void irAlAnterior() {
+        if (listaVehiculos.contarNodos() > 0) {
+            nodoMostrar = nodoMostrar.getAnterior();
+        }
     }
 
     @PostConstruct//para despues que se ins se llame este objeto
     public void llenarVehiculos() {
-        try {
-            listaVehiculos.adicionarNodoAlFinal(new Buseta((byte) 30, "SAN123", new Date(), "manizales"));
-            listaVehiculos.adicionarNodoAlFinal(new Moto(true, "TVL03D", new Date(), "manizales"));
-            listaVehiculos.adicionarNodoAlFinal(new Moto(false, "NAC995", new Date(), "manizales"));
-            listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "NAE033", new Date(), "manizales"));
-            listaVehiculos.adicionarNodoAlFinal(new Volqueta((byte) 9, "DFG033", new Date(), "manizales"));
-            listaVehiculos.adicionarNodoAlFinal(new Volqueta((byte) 18, "GHJ033", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoDEAlFinal(new Buseta((byte) 30, "SAN123", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoDEAlFinal(new Moto(true, "TVL03D", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoDEAlFinal(new Moto(false, "NAC995", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoDEAlFinal(new Automovil(true, "NAE033", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoDEAlFinal(new Volqueta((byte) 9, "DFG033", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoDEAlFinal(new Volqueta((byte) 18, "GHJ033", new Date(), "manizales"));
 ////        listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "5NAE033", new Date()));
-            irAlPrimero();
-        } catch (ParqueaderoExepcion ex) {
-            JsfUtil.addErrorMessage(ex.getMessage());
-        }
+        irAlPrimero();
+
     }
 //===================================================Diagrama PrimeFaces=======================================
 
     public void init() {
         model = new DefaultDiagramModel();
-        model.setMaxConnections(-1);//
+        model.setMaxConnections(-1);
 
 //        Element elementA = new Element("", "5em", "5em");
 //        elementA.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
@@ -545,10 +502,11 @@ public class BeanParqueadero implements Serializable {
 //
 //        model.addElement(elementA);
         int cont = 1;
-        Nodo temp = listaVehiculos.getCabeza();
+        NodoDE temp = listaVehiculos.getCabeza();
+        NodoDE temp2 = listaVehiculos.getCabeza();
         while (cont <= listaVehiculos.contarNodos()) {
             if (cont == 1) {
-                crearPrimerNodoDiagrama(cont, temp);
+                crearPrimerNodoDiagrama(temp);
                 temp = temp.getSiguiente();
                 cont++;
             } else {
@@ -563,124 +521,30 @@ public class BeanParqueadero implements Serializable {
         return model;
     }
 
-    private void crearNodoDiagrama(int pos, Nodo nodo) {
+    private void crearNodoDiagrama(int pos, NodoDE nodo) {
         int cont = pos * 5;
         String horizontal = Integer.toString(cont) + "em";
         String verticar = Integer.toString(cont) + "em";
         Element nuevoVehiculo = new Element(nodo.getDato().getPlaca(), horizontal, verticar);
-        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.TOP));
-        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
-
+        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.LEFT));
+        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.RIGHT));
         model.addElement(nuevoVehiculo);
-        String siguiente = "siguiente";
-        model.connect(new Connection(model.getElements().get(pos - 2).getEndPoints().get(1), nuevoVehiculo.getEndPoints().get(0)));
+
+        model.connect(new Connection(model.getElements().get(pos - 2).getEndPoints().get(1), nuevoVehiculo.getEndPoints().get(1)));
+        model.connect(new Connection(model.getElements().get(pos - 2).getEndPoints().get(0), nuevoVehiculo.getEndPoints().get(0)));
+
     }
 
-    private void crearPrimerNodoDiagrama(int pos, Nodo nodo) {
+    private void crearPrimerNodoDiagrama(NodoDE nodo) {
         int cont = 4;
         String horizontal = Integer.toString(cont) + "em";
         String verticar = Integer.toString(cont) + "em";
         Element nuevoVehiculo = new Element(nodo.getDato().getPlaca(), horizontal, verticar);
-        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
-        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
+        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.LEFT));
+        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.RIGHT));
+        nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.TOP));
         model.addElement(nuevoVehiculo);
-    }
 
-    //===================================================Charts - Pie PrimeFaces=======================================
-    private PieChartModel pieModel1;
-    private PieChartModel pieModel2;
-
-    public void inicializarGraficoCircular() {
-        createPieModel1(numeroDeMotos, numeroDeAuto, numeroDeBusetas, numeroDeVolquetas);
-        createPieModel2(numeroDeMotos, numeroDeAuto, numeroDeBusetas, numeroDeVolquetas);
-    }
-
-    public PieChartModel getPieModel1() {
-        return pieModel1;
-    }
-
-    public PieChartModel getPieModel2() {
-        return pieModel2;
-    }
-
-    private void createPieModel1(int moto, int auto, int buseta, int volqueta) {
-        pieModel1 = new PieChartModel();
-
-        pieModel1.set("Motos", moto);
-        pieModel1.set("Autos", auto);
-        pieModel1.set("Busetas", buseta);
-        pieModel1.set("Volquetas", volqueta);
-
-        pieModel1.setTitle("Primer Grafica de contorno");
-        pieModel1.setLegendPosition("w");
-    }
-
-    private void createPieModel2(int moto, int auto, int buseta, int volqueta) {
-        pieModel2 = new PieChartModel();
-
-        pieModel2.set("Motos", moto);
-        pieModel2.set("Autos", auto);
-        pieModel2.set("Busetas", buseta);
-        pieModel2.set("Volquetas", volqueta);
-
-        pieModel2.setTitle("Segunda Grafica de % entre el 100%");
-        pieModel2.setLegendPosition("e");
-        pieModel2.setFill(false);
-        pieModel2.setShowDataLabels(true);
-        pieModel2.setDiameter(150);
-    }
-
-    //===================================================Charts - Bar PrimeFaces=======================================
-    private BarChartModel barModel;
-    private HorizontalBarChartModel horizontalBarModel;
-
-    public void inicializarBarras() {
-        createBarModels();
-    }
-
-    public BarChartModel getBarModel() {
-        return barModel;
-    }
-
-    public HorizontalBarChartModel getHorizontalBarModel() {
-        return horizontalBarModel;
-    }
-
-    private BarChartModel initBarModel(int moto, int auto, int buseta, int volqueta) {
-        BarChartModel model = new BarChartModel();
-
-        ChartSeries motos = new ChartSeries();
-        motos.setLabel("Vehiculos");
-        motos.set("Motos", moto);
-        motos.set("Automovil", auto);
-        motos.set("Buseta", buseta);
-        motos.set("Volqueta", volqueta);
-
-//        ChartSeries Autos = new ChartSeries(); // Esto me sirve para comparar con otros datos 
-//        Autos.setLabel("Automovil");
-////        Autos.set("Automovil", 52);
-        model.addSeries(motos);
-//        model.addSeries(Autos);
-        return model;
-    }
-
-    private void createBarModels() {
-        createBarModel();
-    }
-
-    private void createBarModel() {
-        barModel = initBarModel(numeroDeMotos, numeroDeAuto, numeroDeBusetas, numeroDeVolquetas);
-
-        barModel.setTitle("Grafica de Columnas");
-        barModel.setLegendPosition("ne");//Posicion de la etiqueta
-
-        Axis xAxis = barModel.getAxis(AxisType.X);
-        xAxis.setLabel("Vehiculo"); //Nombre en eje X
-
-        Axis yAxis = barModel.getAxis(AxisType.Y);
-        yAxis.setLabel("Cantidad"); //Nombre en eje Y
-        yAxis.setMin(0); //Intervalo desde
-        yAxis.setMax(10);//intervalo Hasta
     }
 
 }
