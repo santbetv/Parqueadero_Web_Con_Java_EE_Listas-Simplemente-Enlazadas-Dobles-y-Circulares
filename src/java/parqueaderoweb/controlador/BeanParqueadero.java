@@ -9,6 +9,18 @@ import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.util.Date;
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import static org.primefaces.component.organigram.Organigram.PropertyKeys.autoScrollToSelection;
+import static org.primefaces.component.organigram.Organigram.PropertyKeys.leafNodeConnectorHeight;
+import static org.primefaces.component.organigram.Organigram.PropertyKeys.zoom;
+import org.primefaces.component.organigram.OrganigramHelper;
+import org.primefaces.event.organigram.OrganigramNodeCollapseEvent;
+import org.primefaces.event.organigram.OrganigramNodeDragDropEvent;
+import org.primefaces.event.organigram.OrganigramNodeExpandEvent;
+import org.primefaces.event.organigram.OrganigramNodeSelectEvent;
+import org.primefaces.model.DefaultOrganigramNode;
+import org.primefaces.model.OrganigramNode;
 import org.primefaces.model.chart.BarChartModel;
 import org.primefaces.model.chart.HorizontalBarChartModel;
 import org.primefaces.model.chart.PieChartModel;
@@ -27,6 +39,11 @@ import parqueadero.Modelo.Nodo;
 import parqueadero.Modelo.Vehiculo;
 import parqueadero.Modelo.Volqueta;
 import parqueaderoweb.utilidades.JsfUtil;
+import org.primefaces.model.diagram.connector.FlowChartConnector;
+import org.primefaces.model.diagram.endpoint.BlankEndPoint;
+import org.primefaces.model.diagram.endpoint.EndPoint;
+import org.primefaces.model.diagram.overlay.ArrowOverlay;
+import org.primefaces.model.diagram.overlay.LabelOverlay;
 
 /**
  *
@@ -43,6 +60,7 @@ public class BeanParqueadero implements Serializable {
     private ListaSE listaVehiculos = new ListaSE(); // Voy a tener acceso a los metodos de listaSE
     private int posicionQueSeraEliminada; //Variable que toma la posicion que requiero que se elimine
     private DefaultDiagramModel model;//Este es el diagrama que me permite ver la opciones en la web
+    private DefaultDiagramModel model2;//Este es el diagrama que me permite ver la opciones en la web
     private boolean opcionSeleccionado;//Capturo el tipo de opcion seleccionada caso o pasaCintas
     private byte numeroDeAsientos = 5;//Capturo el numero de nuemroAsientos buseta
     private byte numeroDeToneladas = 6;//Capturo el numero de nuemroAsientos buseta
@@ -521,12 +539,12 @@ public class BeanParqueadero implements Serializable {
     @PostConstruct//para despues que se ins se llame este objeto
     public void llenarVehiculos() {
         try {
-            listaVehiculos.adicionarNodoAlFinal(new Buseta((byte) 30, "SAN123", new Date(), "manizales"));
-            listaVehiculos.adicionarNodoAlFinal(new Moto(true, "TVL03D", new Date(), "manizales"));
-            listaVehiculos.adicionarNodoAlFinal(new Moto(false, "NAC995", new Date(), "manizales"));
-            listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "NAE033", new Date(), "manizales"));
-            listaVehiculos.adicionarNodoAlFinal(new Volqueta((byte) 9, "DFG033", new Date(), "manizales"));
-            listaVehiculos.adicionarNodoAlFinal(new Volqueta((byte) 18, "GHJ033", new Date(), "manizales"));
+            listaVehiculos.adicionarNodoAlFinal(new Moto(true, "HAY876", new Date(), "manizales"));
+            listaVehiculos.adicionarNodoAlFinal(new Buseta((byte) 30, "UNA123", new Date(), "manizales"));
+            listaVehiculos.adicionarNodoAlFinal(new Moto(false, "SOL495", new Date(), "manizales"));
+            listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "COS467", new Date(), "manizales"));
+            listaVehiculos.adicionarNodoAlFinal(new Volqueta((byte) 9, "ENM198", new Date(), "manizales"));
+            listaVehiculos.adicionarNodoAlFinal(new Volqueta((byte) 18, "MIF027", new Date(), "manizales"));
 ////        listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "5NAE033", new Date()));
             irAlPrimero();
         } catch (ParqueaderoExepcion ex) {
@@ -606,24 +624,25 @@ public class BeanParqueadero implements Serializable {
     private void createPieModel1(int moto, int auto, int buseta, int volqueta) {
         pieModel1 = new PieChartModel();
 
-        pieModel1.set("Motos", moto);
-        pieModel1.set("Autos", auto);
-        pieModel1.set("Busetas", buseta);
-        pieModel1.set("Volquetas", volqueta);
+        pieModel1.set("Motos: " + moto, moto);
+        pieModel1.set("Autos: " + auto, auto);
+        pieModel1.set("Busetas: " + buseta, buseta);
+        pieModel1.set("Volquetas: " + volqueta, volqueta);
 
         pieModel1.setTitle("Primer Grafica de contorno");
         pieModel1.setLegendPosition("w");
+
     }
 
     private void createPieModel2(int moto, int auto, int buseta, int volqueta) {
         pieModel2 = new PieChartModel();
 
-        pieModel2.set("Motos", moto);
-        pieModel2.set("Autos", auto);
-        pieModel2.set("Busetas", buseta);
-        pieModel2.set("Volquetas", volqueta);
+        pieModel2.set("Motos: " + moto, moto);
+        pieModel2.set("Autos: " + auto, auto);
+        pieModel2.set("Busetas: " + buseta, buseta);
+        pieModel2.set("Volquetas: " + volqueta, volqueta);
 
-        pieModel2.setTitle("Segunda Grafica de % entre el 100%");
+        pieModel2.setTitle("Segunda Grafica de % del 100%");
         pieModel2.setLegendPosition("e");
         pieModel2.setFill(false);
         pieModel2.setShowDataLabels(true);
@@ -673,7 +692,7 @@ public class BeanParqueadero implements Serializable {
 
         barModel.setTitle("Grafica de Columnas");
         barModel.setLegendPosition("ne");//Posicion de la etiqueta
-
+        barModel.setAnimate(true); // Este es la opcion de dar animacion a las columnas
         Axis xAxis = barModel.getAxis(AxisType.X);
         xAxis.setLabel("Vehiculo"); //Nombre en eje X
 
@@ -683,4 +702,219 @@ public class BeanParqueadero implements Serializable {
         yAxis.setMax(10);//intervalo Hasta
     }
 
+    //=================================================Diagrama Realizado por el profesor=============================
+    public void inicializarDigrama2() {
+
+        model2 = new DefaultDiagramModel();
+        model2.setMaxConnections(-1);
+
+        //Defino el conector por defecto
+        FlowChartConnector connector = new FlowChartConnector();
+        connector.setPaintStyle("{strokeStyle:'#C7B097',lineWidth:3}");
+        model2.setDefaultConnector(connector);
+
+        if (getListaVehiculos().getCabeza() != null) {
+
+            Nodo temp = getListaVehiculos().getCabeza();
+            int x = 10;
+            int y = 4;
+            while (temp != null) {
+
+                //De esta forma se adiciona los elementos
+                Element elemento = new Element(temp.getDato().getPlaca(), x + "em", y + "em");
+                temp = temp.getSiguiente();
+                model2.addElement(elemento);
+
+                elemento.addEndPoint(new BlankEndPoint(EndPointAnchor.TOP));
+                elemento.addEndPoint(new BlankEndPoint(EndPointAnchor.BOTTOM_RIGHT));
+                x += 10;
+                y += 6;
+
+            }
+
+            for (int i = 0; i < model2.getElements().size() - 1; i++) {
+                model2.connect(createConnection(model2.getElements().get(i).getEndPoints().get(1),
+                        model2.getElements().get(i + 1).getEndPoints().get(0), "Sig"));
+
+            }
+
+        }
+    }
+
+    public DefaultDiagramModel getModel2() {
+        return model2;
+    }
+
+    //Une dos puntos de finalizacion con el conector que se haya definido 
+    private Connection createConnection(EndPoint from, EndPoint to, String label) {
+        Connection conn = new Connection(from, to);
+        conn.getOverlays().add(new ArrowOverlay(20, 20, 1, 1));
+
+        if (label != null) {
+            conn.getOverlays().add(new LabelOverlay(label, "flow-label", 0.5));
+        }
+
+        return conn;
+    }
+
+    //=================================================================Diagrama que tiene lo requerido del click===================================
+    //======================================Atributos==================================================================
+    private String datoDeplaca = ""; // Creo esta variable para tomar el dato seleccionado por click
+
+    private OrganigramNode rootNode; // Indica el nodo 
+    private OrganigramNode selection; //Indica la sellecion realizada
+
+    private boolean zoom = false; //Zoom
+    private String style = "width: 500px"; //Tamaño del panel 
+    private int leafNodeConnectorHeight = 0; // Espacio entre los nodos
+    private boolean autoScrollToSelection = false; //Sroll de movimineto
+
+    //===============================================Metodos Utilizados por el diagrama========================
+    public void inicializarDiagramaClick() {
+
+        selection = new DefaultOrganigramNode();
+
+        rootNode = new DefaultOrganigramNode("pintarTitulo", "Placas de Autos", null); //Nodo pricipal titulo
+        rootNode.setCollapsible(false);
+        rootNode.setDroppable(true);
+
+        if (getListaVehiculos().getCabeza() != null) {
+            Nodo temp = getListaVehiculos().getCabeza();
+            while (temp != null) {
+                //De esta forma se adiciona los elementos
+                addDivision(rootNode, temp.getDato().getPlaca());
+                setLeafNodeConnectorHeight(30);
+                setZoom(true);
+                temp = temp.getSiguiente();
+            }
+        }
+    }
+
+    protected OrganigramNode addDivision(OrganigramNode parent, String name) { //Metodo que adiciona las diviciones requeridas
+        OrganigramNode divisionNode = new DefaultOrganigramNode("pintarDiagrama", name, parent);
+        divisionNode.setDroppable(true);
+        divisionNode.setDraggable(true);
+        divisionNode.setSelectable(true);
+
+        return divisionNode;
+    }
+
+    public void eliminarPorPlacaDos() {//-------------Metodo para eliminar posiciones por placa---------------------------------nuevo
+        OrganigramNode currentSelection = OrganigramHelper.findTreeNode(rootNode, selection);
+        setDatoDeplaca("" + currentSelection.getData());
+        listaVehiculos.eliminarNodoXPlaca(getDatoDeplaca());
+        irAlPrimero();
+    }
+
+    public void enviarAlFinal() {//-------------Metodo para enviar al final por placa---------------------------------nuevo
+        OrganigramNode currentSelection = OrganigramHelper.findTreeNode(rootNode, selection);
+        setDatoDeplaca("" + currentSelection.getData());
+        listaVehiculos.enviarAlFinal(getDatoDeplaca());
+        irAlPrimero();
+    }
+
+    public void enviarAlInicio() {//-------------Metodo para enviar al inicio por placa---------------------------------nuevo
+        OrganigramNode currentSelection = OrganigramHelper.findTreeNode(rootNode, selection);
+        setDatoDeplaca("" + currentSelection.getData());
+        listaVehiculos.enviarAlInicio(getDatoDeplaca());
+        irAlPrimero();
+    }
+
+    public void modificarInformacionDiagrama() { //-------------Metodo para modificar la informacion de fecha y valor pagado---------------------------------nuevo
+        OrganigramNode currentSelection = OrganigramHelper.findTreeNode(rootNode, selection);
+        setDatoDeplaca("" + currentSelection.getData());
+        listaVehiculos.modificarInformacionDiagrama(getDatoDeplaca(), nodoMostrar.getDato().getNuevofechaHoraEntrada(), nodoMostrar.getDato().getNuevoValorAPagar());
+
+    }
+
+    public void nodeDragDropListener(OrganigramNodeDragDropEvent event) { // Puedo mover todo los nodos en las posiciones que yo requiera
+        FacesMessage message = new FacesMessage();
+        message.setSummary("Node '" + event.getOrganigramNode().getData()
+                + "' moved from " + event.getSourceOrganigramNode().getData()
+                + " to '" + event.getTargetOrganigramNode().getData() + "'");
+        message.setSeverity(FacesMessage.SEVERITY_INFO);
+
+        FacesContext.getCurrentInstance().addMessage(null, message);
+    }
+
+    public void nodeSelectListener(OrganigramNodeSelectEvent event) { // Saca un mesaje el cual indica que dato a tomado del nodo
+        FacesMessage message = new FacesMessage();
+        message.setSummary("Node '" + event.getOrganigramNode().getData() + "' selected.");
+//        setDatoDeplaca("" + event.getOrganigramNode().getData()); // Esta opción me sirve para dar datos por click izquiedo
+        message.setSeverity(FacesMessage.SEVERITY_INFO);
+        FacesContext.getCurrentInstance().addMessage(null, message);
+    }
+
+    public void nodeCollapseListener(OrganigramNodeCollapseEvent event) { //Cuando utilice esta opcion se escondera la casilla 
+        FacesMessage message = new FacesMessage();
+        message.setSummary("Node '" + event.getOrganigramNode().getData() + "' collapsed.");
+        message.setSeverity(FacesMessage.SEVERITY_INFO);
+
+        FacesContext.getCurrentInstance().addMessage(null, message);
+    }
+
+    public void nodeExpandListener(OrganigramNodeExpandEvent event) { //Cuando utilice esta opcion se mostrara la casilla 
+        FacesMessage message = new FacesMessage();
+        message.setSummary("Node '" + event.getOrganigramNode().getData() + "' expanded.");
+        message.setSeverity(FacesMessage.SEVERITY_INFO);
+
+        FacesContext.getCurrentInstance().addMessage(null, message);
+    }
+
+    //=========================================================== getter and setter del codigo===========
+    public String getDatoDeplaca() {
+        return datoDeplaca;
+    }
+
+    public void setDatoDeplaca(String datoDeplaca) {
+        this.datoDeplaca = datoDeplaca;
+    }
+
+    public OrganigramNode getRootNode() {
+        return rootNode;
+    }
+
+    public void setRootNode(OrganigramNode rootNode) {
+        this.rootNode = rootNode;
+    }
+
+    public OrganigramNode getSelection() {
+        return selection;
+    }
+
+    public void setSelection(OrganigramNode selection) {
+        this.selection = selection;
+    }
+
+    public boolean isZoom() {
+        return zoom;
+    }
+
+    public void setZoom(boolean zoom) {
+        this.zoom = zoom;
+    }
+
+    public String getStyle() {
+        return style;
+    }
+
+    public void setStyle(String style) {
+        this.style = style;
+    }
+
+    public int getLeafNodeConnectorHeight() {
+        return leafNodeConnectorHeight;
+    }
+
+    public void setLeafNodeConnectorHeight(int leafNodeConnectorHeight) {
+        this.leafNodeConnectorHeight = leafNodeConnectorHeight;
+    }
+
+    public boolean isAutoScrollToSelection() {
+        return autoScrollToSelection;
+    }
+
+    public void setAutoScrollToSelection(boolean autoScrollToSelection) {
+        this.autoScrollToSelection = autoScrollToSelection;
+    }
 }
