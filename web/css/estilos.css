@@ -42,7 +42,7 @@
 
 .inicio button{
     width: 190px;
-    height: 35px;
+    height: 190px;
     border-radius: 5px;
     color: limegreen;
     background: white;
@@ -57,7 +57,7 @@
     width: 157px;
     height: 140px;
     position: relative;
-    top: 200px;
+    top: 100px;
     left: 1100px;
     border-radius: 9px;
 }

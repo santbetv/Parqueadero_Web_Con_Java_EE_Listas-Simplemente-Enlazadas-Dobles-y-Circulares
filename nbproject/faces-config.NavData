@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scene Scope="Project" version="2">
     <Scope Scope="Faces Configuration Only"/>
-    <Scope Scope="Project"/>
+    <Scope Scope="Project">
+        <Node id="listaDEC/listadec.xhtml" x="322" y="348" zoom="true"/>
+        <Node id="listaDE/listade.xhtml" x="547" y="249" zoom="true"/>
+        <Node id="inicioDePagina/welcomePrimefaces.xhtml" x="696" y="12" zoom="true"/>
+        <Node id="listase/listase.xhtml" x="132" y="252" zoom="true"/>
+        <Node id="inicioDePagina/iniciodepagina.xhtml" x="296" y="77" zoom="true"/>
+    </Scope>
     <Scope Scope="All Faces Configurations"/>
 </Scene>

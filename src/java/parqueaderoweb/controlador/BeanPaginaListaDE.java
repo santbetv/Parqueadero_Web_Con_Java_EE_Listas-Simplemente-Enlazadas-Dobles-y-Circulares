@@ -4,17 +4,27 @@ import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.faces.context.FacesContext;
+import org.primefaces.model.chart.Axis;
+import org.primefaces.model.chart.AxisType;
+import org.primefaces.model.chart.BarChartModel;
+import org.primefaces.model.chart.ChartSeries;
+import org.primefaces.model.chart.HorizontalBarChartModel;
+import org.primefaces.model.chart.PieChartModel;
 import org.primefaces.model.diagram.Connection;
 import org.primefaces.model.diagram.DefaultDiagramModel;
 import org.primefaces.model.diagram.DiagramModel;
 import org.primefaces.model.diagram.Element;
+import org.primefaces.model.diagram.connector.FlowChartConnector;
+import org.primefaces.model.diagram.endpoint.BlankEndPoint;
 import org.primefaces.model.diagram.endpoint.DotEndPoint;
+import org.primefaces.model.diagram.endpoint.EndPoint;
 import org.primefaces.model.diagram.endpoint.EndPointAnchor;
+import org.primefaces.model.diagram.overlay.ArrowOverlay;
+import org.primefaces.model.diagram.overlay.LabelOverlay;
+
 import parqueadero.Controlador.ListaDE;
-import parqueadero.Controlador.exepciones.ParqueaderoExepcion;
 import parqueadero.Modelo.Automovil;
 import parqueadero.Modelo.Buseta;
 import parqueadero.Modelo.Moto;
@@ -34,10 +44,12 @@ public class BeanPaginaListaDE implements Serializable {
     private boolean deshabilitarNuevo = true; //Este atributo es para que se deshabilite los ImputText
     private int tipoVehiculoSeleccionado; //Indica el numero que selecciona en el selectOneMenu, tipo de vehiculo
     private int tipoVehiculoBuscado; //Indica el numero que selecciona en el selectOneMenu, tipo de vehiculo
+    private int filtroRealizado; //Indica el numero que selecciona en el selectOneMenu, tipo de vehiculo
     private NodoDE nodoMostrar = new NodoDE(new Vehiculo()); //ayudante que toma los datos de la lista y me los va a mostrar en la paguina
     private ListaDE listaVehiculos = new ListaDE(); // Voy a tener acceso a los metodos de listaSE
     private int posicionQueSeraEliminada; //Variable que toma la posicion que requiero que se elimine
     private DefaultDiagramModel model;//Este es el diagrama que me permite ver la opciones en la web
+    private DefaultDiagramModel model2;//Este es el diagrama que me permite ver la opciones en la web
     private boolean opcionSeleccionado;//Capturo el tipo de opcion seleccionada caso o pasaCintas
     private byte numeroDeAsientos = 5;//Capturo el numero de nuemroAsientos buseta
     private byte numeroDeToneladas = 6;//Capturo el numero de nuemroAsientos buseta
@@ -57,9 +69,35 @@ public class BeanPaginaListaDE implements Serializable {
     private boolean deshabilitarInvertirLista = false;//Indica en primera instancia que esta deshabilitado el boton
     private boolean deshabilitarEliminarPorCabeza = false;//Indica en primera instancia que esta deshabilitado el boton 
     private boolean deshabilitarEliminarPorUltimo = false;//Indica en primera instancia que esta deshabilitado el boton 
-    //===============================================================================
+    private boolean deshabilitarDiagrama = false;//Indica en primera instancia que esta deshabilitado el boton 
+    private boolean deshabilitarPanel = false;//Indica en primera instancia que esta deshabilitado el boton
 
+//===============================================================================
     public BeanPaginaListaDE() {
+    }
+
+    public int getFiltroRealizado() {
+        return filtroRealizado;
+    }
+
+    public void setFiltroRealizado(int filtroRealizado) {
+        this.filtroRealizado = filtroRealizado;
+    }
+
+    public boolean isDeshabilitarDiagrama() {
+        return deshabilitarDiagrama;
+    }
+
+    public void setDeshabilitarDiagrama(boolean deshabilitarDiagrama) {
+        this.deshabilitarDiagrama = deshabilitarDiagrama;
+    }
+
+    public boolean isDeshabilitarPanel() {
+        return deshabilitarPanel;
+    }
+
+    public void setDeshabilitarPanel(boolean deshabilitarPanel) {
+        this.deshabilitarPanel = deshabilitarPanel;
     }
 
     public boolean isDeshabilitarBtnIrAlAnterior() {
@@ -255,6 +293,20 @@ public class BeanPaginaListaDE implements Serializable {
         numeroDeToneladas = 6;
     }
 
+    public void mostrarGraficos() {
+        inicializarDigrama2();
+//        init();
+    }
+
+    public void inicializarValidadores() {
+        mostrarGraficos();
+        verificarDatosVacios();
+        verificarDatosConUnDato();
+        deshabilitarDatosConElUltimo();
+        vehiculosEnMemoria();
+        filtroRealizado();
+    }
+
     //true es: SI false es: NO
     public void verificarDatosVacios() { // Creo metodo que valida si es 0, deshabilite la informacion que requiero
         if (listaVehiculos.contarNodos() == 0) {
@@ -376,13 +428,20 @@ public class BeanPaginaListaDE implements Serializable {
         deshabilitarNuevo = true;
         irAlPrimero();
         JsfUtil.addSuccessMessage("Se ha Invertido con éxito");
-
     }
 
     public void eliminarVehiculo() {
         listaVehiculos.eliminarNodo(nodoMostrar.getDato());
         deshabilitarNuevo = true;
-        irAlPrimero();
+        if (listaVehiculos.getCabeza() == null) {
+            nodoMostrar = new NodoDE(new Vehiculo());
+            tipoVehiculoSeleccionado = 0;
+            opcionSeleccionado = true;
+            numeroDeAsientos = 5;
+            numeroDeToneladas = 6;
+        } else {
+            irAlPrimero();
+        }
         JsfUtil.addSuccessMessage("Se ha Eliminado con éxito");
     }
 
@@ -473,8 +532,28 @@ public class BeanPaginaListaDE implements Serializable {
     }
 
     public void irAlAnterior() {
-        if (listaVehiculos.contarNodos() > 0) {
+        if (nodoMostrar.getAnterior() != null) {
             nodoMostrar = nodoMostrar.getAnterior();
+        }
+    }
+
+    public void filtroRealizado() {//Metodo que me permite activar o desactivar panel o diagrama
+        switch (filtroRealizado) {
+            case 1:
+                deshabilitarDiagrama = true;
+                deshabilitarPanel = false;
+                break;
+            case 2:
+                deshabilitarPanel = true;
+                deshabilitarDiagrama = false;
+                break;
+            case 3:
+                deshabilitarDiagrama = false;
+                deshabilitarPanel = false;
+                break;
+            default:
+                filtroRealizado = 0;
+                break;
         }
     }
 
@@ -485,7 +564,7 @@ public class BeanPaginaListaDE implements Serializable {
         listaVehiculos.adicionarNodoDEAlFinal(new Moto(false, "NAC995", new Date(), "manizales"));
         listaVehiculos.adicionarNodoDEAlFinal(new Automovil(true, "NAE033", new Date(), "manizales"));
         listaVehiculos.adicionarNodoDEAlFinal(new Volqueta((byte) 9, "DFG033", new Date(), "manizales"));
-        listaVehiculos.adicionarNodoDEAlFinal(new Volqueta((byte) 18, "GHJ033", new Date(), "manizales"));
+        listaVehiculos.adicionarNodoDEAlFinal(new Volqueta((byte) 18, "GHJ999", new Date(), "manizales"));
 ////        listaVehiculos.adicionarNodoAlFinal(new Automovil(true, "5NAE033", new Date()));
         irAlPrimero();
 
@@ -503,7 +582,6 @@ public class BeanPaginaListaDE implements Serializable {
 //        model.addElement(elementA);
         int cont = 1;
         NodoDE temp = listaVehiculos.getCabeza();
-        NodoDE temp2 = listaVehiculos.getCabeza();
         while (cont <= listaVehiculos.contarNodos()) {
             if (cont == 1) {
                 crearPrimerNodoDiagrama(temp);
@@ -544,7 +622,187 @@ public class BeanPaginaListaDE implements Serializable {
         nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.RIGHT));
         nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.TOP));
         model.addElement(nuevoVehiculo);
+    }
+
+    //===================================================Charts - Pie PrimeFaces=======================================
+    private PieChartModel pieModel1;
+    private PieChartModel pieModel2;
+
+    public void inicializarGraficoCircular() {
+        createPieModel1(numeroDeMotos, numeroDeAuto, numeroDeBusetas, numeroDeVolquetas);
+        createPieModel2(numeroDeMotos, numeroDeAuto, numeroDeBusetas, numeroDeVolquetas);
+    }
+
+    public PieChartModel getPieModel1() {
+        return pieModel1;
+    }
+
+    public PieChartModel getPieModel2() {
+        return pieModel2;
+    }
+
+    private void createPieModel1(int moto, int auto, int buseta, int volqueta) {
+        pieModel1 = new PieChartModel();
+
+        pieModel1.set("Motos: " + moto, moto);
+        pieModel1.set("Autos: " + auto, auto);
+        pieModel1.set("Busetas: " + buseta, buseta);
+        pieModel1.set("Volquetas: " + volqueta, volqueta);
+
+        pieModel1.setTitle("Primer Grafica de contorno");
+        pieModel1.setLegendPosition("w");
 
     }
+
+    private void createPieModel2(int moto, int auto, int buseta, int volqueta) {
+        pieModel2 = new PieChartModel();
+
+        pieModel2.set("Motos: " + moto, moto);
+        pieModel2.set("Autos: " + auto, auto);
+        pieModel2.set("Busetas: " + buseta, buseta);
+        pieModel2.set("Volquetas: " + volqueta, volqueta);
+
+        pieModel2.setTitle("Segunda Grafica de % del 100%");
+        pieModel2.setLegendPosition("e");
+        pieModel2.setFill(false);
+        pieModel2.setShowDataLabels(true);
+        pieModel2.setDiameter(150);
+    }
+
+//===================================================Charts - Bar PrimeFaces=======================================
+    private BarChartModel barModel;
+    private HorizontalBarChartModel horizontalBarModel;
+
+    public void inicializarBarras() {
+        createBarModels();
+    }
+
+    public BarChartModel getBarModel() {
+        return barModel;
+    }
+
+    public HorizontalBarChartModel getHorizontalBarModel() {
+        return horizontalBarModel;
+    }
+
+    private BarChartModel initBarModel(int moto, int auto, int buseta, int volqueta) {
+        BarChartModel model = new BarChartModel();
+
+        ChartSeries Vehiculos = new ChartSeries();
+        Vehiculos.setLabel("Vehiculos");
+        Vehiculos.set("Motos", moto);
+        Vehiculos.set("Automovil", auto);
+        Vehiculos.set("Buseta", buseta);
+        Vehiculos.set("Volqueta", volqueta);
+
+//        ChartSeries Autos = new ChartSeries(); // Esto me sirve para comparar con otros datos 
+//        Autos.setLabel("Automovil");
+////        Autos.set("Automovil", 52);
+        model.addSeries(Vehiculos);
+//        model.addSeries(Autos);
+        return model;
+    }
+
+    private void createBarModels() {
+        createBarModel();
+    }
+
+    private void createBarModel() {
+        barModel = initBarModel(numeroDeMotos, numeroDeAuto, numeroDeBusetas, numeroDeVolquetas);
+
+        barModel.setTitle("Grafica de Columnas");
+        barModel.setLegendPosition("ne");//Posicion de la etiqueta
+        barModel.setAnimate(true); // Este es la opcion de dar animacion a las columnas
+        Axis xAxis = barModel.getAxis(AxisType.X);
+        xAxis.setLabel("Vehiculo"); //Nombre en eje X
+
+        Axis yAxis = barModel.getAxis(AxisType.Y);
+        yAxis.setLabel("Cantidad"); //Nombre en eje Y
+        yAxis.setMin(0); //Intervalo desde
+        yAxis.setMax(10);//intervalo Hasta
+    }
+//=======================================================Diagrama profesor=============================================
+
+    public void inicializarDigrama2() {
+
+        model2 = new DefaultDiagramModel();
+        model2.setMaxConnections(-1);
+
+        //Defino el conector por defecto
+        FlowChartConnector connector = new FlowChartConnector();
+        connector.setPaintStyle("{strokeStyle:'#C7B097',lineWidth:3}");
+        model2.setDefaultConnector(connector);
+
+        if (getListaVehiculos().getCabeza() != null) {
+            NodoDE temp = getListaVehiculos().getCabeza();
+            int x = 10;
+            int y = 4;
+            while (temp != null) {
+                //De esta forma se adiciona los elementos
+                Element elemento = new Element(temp.getDato().getPlaca(), x + "em", y + "em");
+                model2.addElement(elemento);
+                elemento.addEndPoint(new DotEndPoint(EndPointAnchor.LEFT));
+                elemento.addEndPoint(new DotEndPoint(EndPointAnchor.TOP));
+                elemento.addEndPoint(new DotEndPoint(EndPointAnchor.RIGHT));
+                elemento.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
+                elemento.setId(temp.getDato().getPlaca());
+                temp = temp.getSiguiente();
+                x += 10;
+                y += 6;
+            }
+
+            for (int i = 0; i < model2.getElements().size() - 1; i++) {
+                model2.connect(createConnection(model2.getElements().get(i).getEndPoints().get(3), model2.getElements().get(i + 1).getEndPoints().get(0), "Sig"));
+
+            }
+            for (int cont = model2.getElements().size() - 1; cont > 0; cont--) {
+                model2.connect(createConnection(model2.getElements().get(cont).getEndPoints().get(1), model2.getElements().get(cont - 1).getEndPoints().get(2), "Ant"));
+            }
+        }
+    }
+
+    public DefaultDiagramModel getModel2() {
+        return model2;
+    }
+
+    //Une dos puntos de finalizacion con el conector que se haya definido 
+    private Connection createConnection(EndPoint from, EndPoint to, String label) {
+        Connection conn = new Connection(from, to);
+        conn.getOverlays().add(new ArrowOverlay(20, 20, 1, 1));
+
+        if (label != null) {
+            conn.getOverlays().add(new LabelOverlay(label, "flow-label", 45));
+        }
+        return conn;
+    }
+
+    public void eliminarPorPlacaProfesor() {//-------------Metodo para eliminar posiciones por placa---------------------------------nuevo
+        listaVehiculos.eliminarNodoXPlaca(PlacaSeleccionada);
+        irAlSguiente();
+    }
+
+    public void enviarAlFinalProfesor() {//-------------Metodo para enviar al final por placa---------------------------------nuevo
+        listaVehiculos.enviarAlFinal(PlacaSeleccionada);
+        irAlPrimero();
+    }
+
+    public void enviarAlInicioProfesor() {//-------------Metodo para enviar al inicio por placa---------------------------------nuevo
+        listaVehiculos.enviarAlInicio(PlacaSeleccionada);
+        irAlPrimero();
+    }
+
+    public void modificarInformacionDiagramaProfesor() { //-------------Metodo para modificar la informacion de fecha y valor pagado---------------------------------nuevo
+        listaVehiculos.modificarInformacionDiagrama(PlacaSeleccionada, nodoMostrar.getDato().getNuevofechaHoraEntrada(), nodoMostrar.getDato().getNuevoValorAPagar());
+    }
+
+    //===================================================Metodo Que permite tomar la placa seleccionada en el click==
+    public void onClickRight() {
+        String id = FacesContext.getCurrentInstance().getExternalContext()
+                .getRequestParameterMap().get("elementId");
+        PlacaSeleccionada = id.replaceAll("frmVehiculos:diagrama-", "");
+        System.out.println("PlacaSeleccionada = " + PlacaSeleccionada); //Solo para realizar pruebas
+    }
+
+    private String PlacaSeleccionada = "";
 
 }

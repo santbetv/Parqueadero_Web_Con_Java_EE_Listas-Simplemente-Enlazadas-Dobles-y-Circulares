@@ -1,0 +1,168 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Casino</title>
+
+        <style type="text/css">
+
+            .ui-diagram-element {   
+                width:5em; 
+                height:5em;
+                line-height:5em;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                border-radius: 5em;
+
+            }
+
+            .ui-diagram-black{
+                border: 10px solid #404a4e; /*Este es el Grandor */
+                background-color: black; /*Este es el color interno*/
+                color: #cccccc; /*Este es el color de la letra*/
+            }
+
+            .ui-diagram-red{
+                border: 10px solid #404a4e; /*Este es el Grandor */
+                background-color: red; /*Este es el color interno*/
+                color: #cccccc; /*Este es el color de la letra*/
+            }
+
+            .ui-diagram-blue{
+                border: 10px solid #404a4e; /*Este es el Grandor */
+                background-color: blue; /*Este es el color interno*/
+                color: #cccccc; /*Este es el color de la letra*/
+            }
+
+            .ui-diagram-blueviolet{
+                border: 10px solid #404a4e; /*Este es el Grandor */
+                background-color: blueviolet; /*Este es el color interno*/
+                color: #cccccc; /*Este es el color de la letra*/
+            }
+
+            .ui-diagram-rosa{
+                border: 10px solid #404a4e; /*Este es el Grandor */
+                background-color: darksalmon; /*Este es el color interno*/
+                color: #cccccc; /*Este es el color de la letra*/
+            }
+            .iu-diagram-theBoxModel{
+                position: absolute;
+                left: 0;
+                top: 60%;
+                height: 100%;
+                width: 100%;
+                text-align: center;
+            }
+
+            .ui-diagram-element:hover { /*/Esto sirve para que cuando pase el mouse por encima cambie de color*/
+                background-color: white;
+                color: red;
+            }
+
+            .pnlGanador{
+                width: 250px;
+                height: 300px;
+            }
+
+            .pnlDiagram{
+                background-image: url("../imagenes/ruleta-casino.jpg");
+                background-size: cover;
+            }
+
+            .pnlFondo{
+                content:"";
+                position:absolute;
+                top:0;
+                left:0;
+                width:100%;
+                height:100%;
+                background:rgba(0,4,0,0.1);
+            }
+
+        </style>                    
+    </h:head>
+    <h:body class="pnlFondo">
+        <h:form>
+
+            <p:growl id="pnlErrores"/>
+
+            <p:panel class="pnlDiagram" id="pnlDiagram" header="Diagrama de funciones en LCDE. Total Fichas: RULETA#{beanPaginaListaDECircular.mostrarGraficos()} #{beanPaginaListaDECircular.listaCasino.contarNodos()}">
+
+                <!--Inicio de filtros realizados en la aplicacion-->
+                <p:panel header="Inicio">
+                    <p:commandButton value="HOME" action="homelistadec" ajax="false"/>
+                </p:panel>
+                <!--Final de filtros realizados en la aplicacion-->
+
+                <p:panel>
+                    <p:panelGrid columns="2"  >
+                        <p:outputLabel for="psoColores" value="Colores"/>
+                        <p:selectOneMenu id="psoColores" required="true" value="#{beanPaginaListaDECircular.numeroColor}" style="width: 200px;">
+                            <f:selectItem itemValue="0" itemLabel="Seleccione un color .." itemEscaped="true"/>
+                            <f:selectItem itemValue="1" itemLabel="NEGRO"/>
+                            <f:selectItem itemValue="2" itemLabel="ROJO" />
+                            <f:selectItem itemValue="3" itemLabel="AZUL"/>
+                            <f:selectItem itemValue="4" itemLabel="VIOLETA"/>
+                            <p:ajax event="change"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel for="spinnerFichas" value="Cantidad de fichas"/>
+                        <p:spinner  id="spinnerFichas" value="#{beanPaginaListaDECircular.numeroDeFichas}" min="0" max="5"/>
+
+                        <p:commandButton  value="Seleccione Ficha" action="#{beanPaginaListaDECircular.nuevoValorRuleta()}" update="pnlDiagram,pnlErrores" style="width: 210px;"/>
+                        <p:commandButton value="Reiniciar JUEGO" action="#{beanPaginaListaDECircular.reiniciarJuego()}" update="pnlDiagram,pnlErrores" style="width: 210px;"/>
+                        <p:commandButton value="Agregar otro color" ajax="false" icon="ui-icon-gear" onclick="PF('pnlAgregarOtroColor').show(); return false;"/>
+                    </p:panelGrid>
+
+                    <p:panelGrid columns="2"  >
+                        <p:outputLabel  value="Eliminar Color: "/>
+                        <p:inputText value="#{beanPaginaListaDECircular.eliminarColorRepetido}"/>
+                        <p:commandButton value="Eliminar color repetido" ajax="false" action="#{beanPaginaListaDECircular.eliminarColorRepetido}" update="pnlDiagram"/>
+                    </p:panelGrid>
+
+                    <!--Se adiciona boton para adicionar cualquier dato requerido-->
+                    <p:dialog id="pnlAgregarOtroColor"
+                              widgetVar="pnlAgregarOtroColor"
+                              header="*Agrege su color especifico en MAYUSCULA">
+
+                        <p:panelGrid columns="2">
+                            <p:outputLabel  value="Color: "/>
+                            <p:inputText value="#{beanPaginaListaDECircular.adicionarOtroColor}"/>
+                            <p:outputLabel for="adicionarMasspinnerFichas" value="Cantidad de fichas"/>
+                            <p:spinner  id="adicionarMasspinnerFichas" value="#{beanPaginaListaDECircular.adicionarOtrasFichasNumeroDeFichas}" min="0" max="5"/>
+                        </p:panelGrid>
+
+                        <p:commandButton process="@parent"
+                                         update="pnlDiagram"
+                                         value="Guardar"
+                                         actionListener="#{beanPaginaListaDECircular.adionarOtroColor()}"
+                                         oncomplete="PF('pnlAgregarOtroColor').hide();"/>
+                    </p:dialog>
+                    <!--Final boton para adicionar cualquier dato requerido-->
+                </p:panel>
+
+                <p:separator />
+                <!--Inicio de diagramas-->
+
+                <p:diagram  value="#{beanPaginaListaDECircular.model}" styleClass="iu-diagram-theBoxModel" />
+                <p:panel header="EL Ganador es: " id="pnlGanador" styleClass="pnlGanador">
+                    <p:diagram  value="#{beanPaginaListaDECircular.model2}" style="height:150px; width: 210px;" styleClass="ui-widget-content" />
+                    <p:commandButton value="Jugar por Derecha" action="#{beanPaginaListaDECircular.metodoQueDeshabilitarXDerecha()}" update="pnlGanador" style="width: 210px;">
+                        <p:poll   interval="1" listener="#{beanPaginaListaDECircular.jugarPorDerecha()}" update="pnlGanador,pnlErrores" autoStart="#{beanPaginaListaDECircular.deshabilitarXDerecha}" stop="#{beanPaginaListaDECircular.pararRuleta}"/>
+                    </p:commandButton>
+                    <p:commandButton value="Jugar por Izquierda" action="#{beanPaginaListaDECircular.metodoQueDeshabilitarXIzquierda()}" update="pnlGanador" style="width: 210px;">
+                        <p:poll   interval="1" listener="#{beanPaginaListaDECircular.jugarPorIzquierda()}" update="pnlGanador,pnlErrores" autoStart="#{beanPaginaListaDECircular.deshabilitarXIzquierda}" stop="#{beanPaginaListaDECircular.pararRuleta}"/>
+                    </p:commandButton>
+                    <p:commandButton value="Parar Ruleta" action="#{beanPaginaListaDECircular.metodoQueParaLaRuleta()}" update="pnlGanador,pnlErrores" style="width: 210px;"/>
+                </p:panel>
+            </p:panel>
+            <!--Final de Diagramas-->
+            <p:separator />
+
+        </h:form>
+    </h:body>
+</html>
+
+

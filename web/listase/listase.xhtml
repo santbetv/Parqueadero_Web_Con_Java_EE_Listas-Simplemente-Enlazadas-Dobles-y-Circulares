@@ -17,18 +17,19 @@
                 line-height:4em;
                 text-align: center;
                 background: #93e7ff;
-                background: -moz-linear-gradient(top, #93e7ff 0%, #007efc 100%);
-                background: -webkit-linear-gradient(top, #93e7ff 0%,#007efc 100%);
-                background: linear-gradient(to bottom, #93e7ff 0%,#007efc 100%);
+                background: -moz-linear-gradient(top, #93e7ff 0%, #FFFAF0 100%);
+                background: -webkit-linear-gradient(top, #93e7ff 0%,#FFFAF0 100%);
+                background: linear-gradient(to bottom, #93e7ff 0%,#FFFAF0 100%);
             }
         </style>
 
         <style> 
             .ui-organigram .ui-organigram-node.pintarDiagrama {
-                background: #93e7ff;
-                background: -moz-linear-gradient(top, #93e7ff 0%, #007efc 300%);
-                background: -webkit-linear-gradient(top, #93e7ff 0%,#007efc 100%);
-                background: linear-gradient(to bottom, #93e7ff 0%,#007efc 100%);
+                color: red;
+                border:0.1em dotted #B22222;
+                background: -moz-linear-gradient(top, #93e7ff 20%, #FFFAF0 300%);
+                background: -webkit-linear-gradient(top, #93e7ff 20%,#FFFAF0 100%);
+                background: linear-gradient(to bottom, #93e7ff 20%,#FFFAF0 100%);
                 border-radius: 26px;
                 width:14em; 
                 height:4em; 
@@ -37,15 +38,29 @@
 
     </h:head>
     <h:body>
-        <h:form> <!--Este es el Inicio del codigo principal-->
+        <h:form id="frmVehiculos"> <!--Este es el Inicio del codigo principal-->
 
             <p:growl id="pnlErrores"/>
 
-            <p:panel header="#{bundle.titulo} #{beanParqueadero.listaVehiculos.contarNodos()} #{beanParqueadero.verificarDatosVacios()} #{beanParqueadero.verificarDatosConUnDato()} #{beanParqueadero.deshabilitarDatosConElUltimo()} #{beanParqueadero.vehiculosEnMemoria()} #{beanParqueadero.init()} #{beanParqueadero.inicializarGraficoCircular()} #{beanParqueadero.inicializarBarras()} #{beanParqueadero.inicializarDigrama2()} #{beanParqueadero.inicializarDiagramaClick()}" id="pnlDatosVehiculo">
-                <p:commandButton value="Habilitar panel, Deshabilitar digrama" update="pnlDatosVehiculo" action="#{beanParqueadero.existirPanelMayor()}"/>
-                <p:commandButton value="Habilitar diagrama, Deshabilitar panel" update="pnlDatosVehiculo" action="#{beanParqueadero.existirDiagrama()}"/>
-                <p:commandButton value="Habilitar los dos" update="pnlDatosVehiculo" action="#{beanParqueadero.existirPanelYDiagrama()}"/>
+            <p:panel header="#{bundle.titulo} #{beanParqueadero.listaVehiculos.contarNodos()} #{beanParqueadero.inicializarValidadores()}" id="pnlDatosVehiculo">
 
+                <!--Inicio de filtros realizados en la aplicacion-->
+                <p:panel header="Tus filtros: ">
+                    <p:panelGrid columns="2">
+                        <p:outputLabel  value="Selecciona"/>
+                        <p:selectOneMenu required="true" value="#{beanParqueadero.filtroRealizado}" style="width: 300px;">
+                            <f:selectItem itemValue="0" itemLabel="Seleccione uno .." itemEscaped="true"/>
+                            <f:selectItem itemValue="1" itemLabel="Habilitar panel, Deshabilitar digrama"/>
+                            <f:selectItem itemValue="2" itemLabel="Habilitar diagrama, Deshabilitar panel"/>
+                            <f:selectItem itemValue="3" itemLabel="Habilitar los dos"/>
+                            <p:ajax event="change" update="pnlDatosVehiculo"/>
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton value="HOME" action="homelistase" ajax="false"/>
+                </p:panel>
+                <!--Final de filtros realizados en la aplicacion-->
+
+                <!--Inicio de datos principales de la aplicación-->
                 <p:panel header="Ingreso de datos principales" rendered="#{!beanParqueadero.deshabilitarPanel}">
                     <p:panel >
                         <p:panelGrid columns="2" >
@@ -71,6 +86,8 @@
                                 <p:inputText value="#{beanParqueadero.posicionQueSeraEliminada}" style="width: 20px"/>
                             </p:commandButton>
                         </p:panelGrid>
+
+                        <p:separator />
 
                         <p:panelGrid columns="2" >
                             <p:outputLabel for="pitValorPagar"  value="#{bundle.valorApagar}"/>
@@ -104,13 +121,13 @@
                         </h:panelGroup>
                     </p:panel>
 
-                    <p:panel header="Eliminar por cabeza">
+                    <p:panel header="Eliminar por cabeza FIFO(COLA)">
                         <p:commandButton value="Eliminar Cabeza Con Intervalos" update="pnlDatosVehiculo,pnlErrores" action="#{beanParqueadero.eliminarPorCabe()}">
                             <p:poll   interval="4" listener="#{beanParqueadero.eliminarCabeza()}" update="pnlDatosVehiculo" autoStart="#{beanParqueadero.deshabilitarEliminarPorCabeza}" stop="#{beanParqueadero.listaVehiculos.contarNodos()==0}"/>
                         </p:commandButton>
                     </p:panel>
 
-                    <p:panel header="Eliminar por Ultimo Nodo">
+                    <p:panel header="Eliminar por Ultimo Nodo LIFO(PILA)">
                         <p:commandButton value="Eliminar Ultimo Con Intervalos" update="pnlDatosVehiculo,pnlErrores" action="#{beanParqueadero.eliminarPorUlti()}">
                             <p:poll   interval="4" listener="#{beanParqueadero.eliminarUltimoDeLaLista()}" update="pnlDatosVehiculo" autoStart="#{beanParqueadero.deshabilitarEliminarPorUltimo}" stop="#{beanParqueadero.listaVehiculos.contarNodos()==0}"/>
                         </p:commandButton>
@@ -158,30 +175,101 @@
                         </p:panelGrid>
                     </p:panel>
                 </p:panel>
+                <!--Final de datos principales de la aplicación-->
 
-                <p:panel  header="Diagramas de funciones en LSE" rendered="#{!beanParqueadero.deshabilitarDiagrama}" >
-                    <p:diagram  value="#{beanParqueadero.model}" style="height:700px; width: 900px" styleClass="ui-widget-content" />
-                    <p:diagram value="#{beanParqueadero.model2}" style="height:700px; width: 1150px" styleClass="ui-widget-content" />
-                    <h:panelGrid columns="2" columnClasses="left,right" style="width:100%">
-                        <p:chart type="pie" model="#{beanParqueadero.pieModel1}" style="width:400px" />
-                        <p:chart type="pie" model="#{beanParqueadero.pieModel2}" style="width:400px" />
-                    </h:panelGrid>
+                <!--Inicio de diagramas-->
+                <p:panel id="pnlDiagram" header="Diagramas de funciones en LSE" rendered="#{!beanParqueadero.deshabilitarDiagrama}" >
+                    <p:diagram  id="diagrama" value="#{beanParqueadero.model2}" style="height:700px; width: 1250px" styleClass="ui-widget-content" />
+                    <p:panel  header="Graficos #{beanParqueadero.inicializarBarras()} #{beanParqueadero.inicializarGraficoCircular()}" >
+                        <h:panelGrid columns="2" columnClasses="left,right" style="width:100%">
+                            <p:chart type="pie" model="#{beanParqueadero.pieModel1}" style="width:400px"/>
+                            <p:chart type="pie" model="#{beanParqueadero.pieModel2}" style="width:400px" />
+                        </h:panelGrid>
+                    </p:panel>
                     <p:chart type="bar" model="#{beanParqueadero.barModel}" style="height:300px"/>
+                    <!--<p:diagram id="primerDiagramRealizado" value="#{beanParqueadero.model}" style="height:700px; width: 900px" styleClass="ui-widget-content" />-->
                 </p:panel>
+                <!--Final de Diagramas-->
 
-                <p:panel header="Diagrama con funciones" id="pnlDiagrama" rendered="#{!beanParqueadero.deshabilitarDiagrama}">
+                <!--Inicio Codigo Que inidica que boton del mouse se oprimió-->
+                <p:remoteCommand name="elementClickRight" 
+                                 actionListener="#{beanParqueadero.onClickRight()}" 
+                                 >
+                </p:remoteCommand>
+                <script>
+                    $(document).ready(function () {
+                        $('.ui-diagram > .ui-diagram-element').mousedown(function (info) {
+                            if (info.which === 3) {
+                                elementClickRight([{
+                                        name: 'elementId',
+                                        value: info.target.id
+                                    }]);
+                            }
+                        });
+                    });
+                </script>
+                <!--Final Codigo Que inidica que boton del mouse se oprimió-->
+
+                <!--Inicio del codigo sub menu primer diagrama realizado profesor-->
+                <p:contextMenu for="pnlDiagram" id="pnCmVeh" 
+                               targetFilter=".ui-diagram-element" >
+                    <p:menuitem value="Eliminar" update="pnlDiagram"
+                                ajax="false" icon="ui-icon-closethick" 
+                                actionListener="#{beanParqueadero.eliminarPorPlacaProfesor()}"/>
+                    <p:menuitem value="Mover al Inicio."
+                                update="pnlDiagram"
+                                ajax="false"
+                                icon="ui-icon-arrowthick-1-n"
+                                actionListener="#{beanParqueadero.enviarAlInicioProfesor()}"
+                                />
+                    <p:menuitem value="Mover al Final."
+                                update="pnlDiagram"
+                                ajax="false"
+                                icon="ui-icon-arrowthick-1-s"
+                                actionListener="#{beanParqueadero.enviarAlFinalProfesor()}"
+                                />
+                    <p:menuitem value="Modificar Información"
+                                ajax="false"
+                                icon="ui-icon-gear"
+                                onclick="PF('pnlModiDatosDiagraProfesor').show();
+                                        return false;" />
+                </p:contextMenu>
+
+                <p:dialog id="pnlModiDatosDiagraProfesor"
+                          widgetVar="pnlModiDatosDiagraProfesor"
+                          header="*Modificara la información de la placa seleccionada">
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel  value="#{bundle.fechaDeIngreso}"/>
+                        <p:calendar showOn="button" readonlyInput="true" pattern="MM/dd/yyyy HH:mm:ss" value="#{beanParqueadero.nodoMostrar.dato.nuevofechaHoraEntrada}"/>
+                        <p:outputLabel   value="#{bundle.valorApagar}"/>
+                        <p:inputText   value="#{beanParqueadero.nodoMostrar.dato.nuevoValorAPagar}" />
+                    </p:panelGrid>
+
+                    <p:commandButton process="@parent"
+                                     update="pnlDatosVehiculo,pnlDiagram"
+                                     value="Guardar"
+                                     actionListener="#{beanParqueadero.modificarInformacionDiagramaProfesor()}"
+                                     oncomplete="PF('pnlModiDatosDiagraProfesor').hide();"/>
+                </p:dialog>
+                <!--Final del codigo sub menu primer diagrama realizado profesor-->
+
+
+                <!--Comienzo de diagrama encontrado en prime faces Organigram-->
+                <p:panel header="Diagrama con funciones" id="pnlOrganigram" rendered="#{!beanParqueadero.deshabilitarDiagrama}">
 
                     <p:organigram id="organigram"
                                   widgetVar="organigram"
                                   value="#{beanParqueadero.rootNode}"
                                   var="node"
+                                  
                                   leafNodeConnectorHeight="#{beanParqueadero.leafNodeConnectorHeight}"
                                   autoScrollToSelection="#{beanParqueadero.autoScrollToSelection}"
                                   zoom="#{beanParqueadero.zoom}"
                                   selection="#{beanParqueadero.selection}"
                                   style="#{beanParqueadero.style}" >
 
-                        <p:ajax event="dragdrop" process="@this" update="pnlDiagrama,pnlErrores" listener="#{beanParqueadero.nodeDragDropListener}" />
+                        <p:ajax event="dragdrop" process="@this" update="pnlOrganigram,pnlErrores" listener="#{beanParqueadero.nodeDragDropListener}" />
                         <p:ajax event="select" process="@this" update="pnlErrores" listener="#{beanParqueadero.nodeSelectListener}" />
                         <p:ajax event="contextmenu" process="@this" />
                         <p:ajax event="collapse" process="@this" update="pnlDatosVehiculo,pnlErrores" listener="#{beanParqueadero.nodeCollapseListener}" />
@@ -199,7 +287,7 @@
 
                         <p:organigramNode type="pintarDiagrama"
                                           icon="ui-icon-circle-check"
-                                          iconPos="left">
+                                          iconPos="right">
                             <h:outputText value="#{node.data}" />
                         </p:organigramNode>
                     </p:organigram>
@@ -252,7 +340,7 @@
 
                             <h:outputLabel value="autoScrollToSelection" />
                             <p:selectBooleanCheckbox value="#{beanParqueadero.autoScrollToSelection}">
-                                <p:ajax process="@this" update="pnlDiagrama,pnlDatosVehiculo" />
+                                <p:ajax process="@this" update="pnlOrganigram,pnlDatosVehiculo" />
                             </p:selectBooleanCheckbox>
 
                             <h:outputLabel value="leafNodeConnectorHeight" />
@@ -267,6 +355,7 @@
                         </h:panelGrid>
                     </p:panel>
                 </p:panel>
+
             </p:panel>
         </h:form><!--Este es el Final del codigo principal-->
         <!--====================================================Digrama ejemplo============================================-->

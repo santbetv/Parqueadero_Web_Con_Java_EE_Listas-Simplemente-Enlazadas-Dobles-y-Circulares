@@ -56,6 +56,7 @@ public class BeanParqueadero implements Serializable {
     private boolean deshabilitarNuevo = true; //Este atributo es para que se deshabilite los ImputText
     private int tipoVehiculoSeleccionado; //Indica el numero que selecciona en el selectOneMenu, tipo de vehiculo
     private int tipoVehiculoBuscado; //Indica el numero que selecciona en el selectOneMenu, tipo de vehiculo
+    private int filtroRealizado; //Indica el numero que selecciona en el selectOneMenu, tipo de vehiculo
     private Nodo nodoMostrar = new Nodo(new Vehiculo()); //ayudante que toma los datos de la lista y me los va a mostrar en la paguina
     private ListaSE listaVehiculos = new ListaSE(); // Voy a tener acceso a los metodos de listaSE
     private int posicionQueSeraEliminada; //Variable que toma la posicion que requiero que se elimine
@@ -84,6 +85,14 @@ public class BeanParqueadero implements Serializable {
     //===============================================================================
 
     public BeanParqueadero() {
+    }
+
+    public int getFiltroRealizado() {
+        return filtroRealizado;
+    }
+
+    public void setFiltroRealizado(int filtroRealizado) {
+        this.filtroRealizado = filtroRealizado;
     }
 
     public boolean isDeshabilitarDiagrama() {
@@ -287,6 +296,21 @@ public class BeanParqueadero implements Serializable {
         numeroDeToneladas = 6;
     }
 
+    public void mostrarGraficos() {
+        inicializarDiagramaClick();
+        inicializarDigrama2();
+//        init();
+    }
+
+    public void inicializarValidadores() {
+        mostrarGraficos();
+        verificarDatosVacios();
+        verificarDatosConUnDato();
+        deshabilitarDatosConElUltimo();
+        vehiculosEnMemoria();
+        filtroRealizado();
+    }
+
     //true es: SI false es: NO
     public void verificarDatosVacios() { // Creo metodo que valida si es 0, deshabilite la informacion que requiero
         if (listaVehiculos.contarNodos() == 0) {
@@ -426,8 +450,18 @@ public class BeanParqueadero implements Serializable {
     public void eliminarVehiculo() {
         listaVehiculos.eliminarNodo(nodoMostrar.getDato());
         deshabilitarNuevo = true;
-        irAlPrimero();
+        if (listaVehiculos.getCabeza() == null) {
+            nodoMostrar = new Nodo(new Vehiculo());
+            tipoVehiculoSeleccionado = 0;
+            opcionSeleccionado = true;
+            numeroDeAsientos = 5;
+            numeroDeToneladas = 6;
+        } else {
+            irAlPrimero();
+        }
         JsfUtil.addSuccessMessage("Se ha Eliminado con éxito");
+        deshabilitarNuevo = true;
+
     }
 
     public void eliminiarXPosicion() {
@@ -441,7 +475,7 @@ public class BeanParqueadero implements Serializable {
         try {
             listaVehiculos.metodoQueEliminaPosicionesImpares();
             deshabilitarNuevo = true;
-            irAlPrimero();
+            irAlSguiente();
             JsfUtil.addSuccessMessage("Se ha Eliminado Posiciones Impares éxito");
         } catch (ParqueaderoExepcion ex) {
             JsfUtil.addErrorMessage(ex.getMessage());
@@ -521,19 +555,24 @@ public class BeanParqueadero implements Serializable {
         listaVehiculos.eliminarNodo(nodoMostrar.getDato());
     }
 
-    public void existirDiagrama() {//Metodo que me permite activar o desactivar panel o diagrama
-        deshabilitarPanel = true;
-        deshabilitarDiagrama = false;
-    }
-
-    public void existirPanelMayor() {//Metodo que me permite activar o desactivar panel o diagrama
-        deshabilitarDiagrama = true;
-        deshabilitarPanel = false;
-    }
-
-    public void existirPanelYDiagrama() {//Metodo que me permite activar o desactivar panel o diagrama
-        deshabilitarDiagrama = false;
-        deshabilitarPanel = false;
+    public void filtroRealizado() {//Metodo que me permite activar o desactivar panel o diagrama
+        switch (filtroRealizado) {
+            case 1:
+                deshabilitarDiagrama = true;
+                deshabilitarPanel = false;
+                break;
+            case 2:
+                deshabilitarPanel = true;
+                deshabilitarDiagrama = false;
+                break;
+            case 3:
+                deshabilitarDiagrama = false;
+                deshabilitarPanel = false;
+                break;
+            default:
+                filtroRealizado = 0;
+                break;
+        }
     }
 
     @PostConstruct//para despues que se ins se llame este objeto
@@ -588,9 +627,9 @@ public class BeanParqueadero implements Serializable {
         Element nuevoVehiculo = new Element(nodo.getDato().getPlaca(), horizontal, verticar);
         nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.TOP));
         nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
+        nuevoVehiculo.setId(nodo.getDato().getPlaca());
 
         model.addElement(nuevoVehiculo);
-        String siguiente = "siguiente";
         model.connect(new Connection(model.getElements().get(pos - 2).getEndPoints().get(1), nuevoVehiculo.getEndPoints().get(0)));
     }
 
@@ -601,9 +640,28 @@ public class BeanParqueadero implements Serializable {
         Element nuevoVehiculo = new Element(nodo.getDato().getPlaca(), horizontal, verticar);
         nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
         nuevoVehiculo.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
+        nuevoVehiculo.setId(nodo.getDato().getPlaca());
         model.addElement(nuevoVehiculo);
     }
 
+    public void eliminarPorPlacaPrimerDiagramRealizado() {//-------------Metodo para eliminar posiciones por placa---------------------------------nuevo
+        listaVehiculos.eliminarNodoXPlaca(PlacaSeleccionada2);
+        irAlSguiente();
+    }
+
+    public void enviarAlFinalPrimerDiagramRealizado() {//-------------Metodo para enviar al final por placa---------------------------------nuevo
+        listaVehiculos.enviarAlFinal(PlacaSeleccionada2);
+        irAlPrimero();
+    }
+
+    public void enviarAlInicioPrimerDiagramRealizado() {//-------------Metodo para enviar al inicio por placa---------------------------------nuevo
+        listaVehiculos.enviarAlInicio(PlacaSeleccionada2);
+        irAlPrimero();
+    }
+
+    public void modificarInformacionDiagramaPrimerDiagramRealizado() { //-------------Metodo para modificar la informacion de fecha y valor pagado---------------------------------nuevo
+        listaVehiculos.modificarInformacionDiagrama(PlacaSeleccionada2, nodoMostrar.getDato().getNuevofechaHoraEntrada(), nodoMostrar.getDato().getNuevoValorAPagar());
+    }
     //===================================================Charts - Pie PrimeFaces=======================================
     private PieChartModel pieModel1;
     private PieChartModel pieModel2;
@@ -668,17 +726,17 @@ public class BeanParqueadero implements Serializable {
     private BarChartModel initBarModel(int moto, int auto, int buseta, int volqueta) {
         BarChartModel model = new BarChartModel();
 
-        ChartSeries motos = new ChartSeries();
-        motos.setLabel("Vehiculos");
-        motos.set("Motos", moto);
-        motos.set("Automovil", auto);
-        motos.set("Buseta", buseta);
-        motos.set("Volqueta", volqueta);
+        ChartSeries Vehiculos = new ChartSeries();
+        Vehiculos.setLabel("Vehiculos");
+        Vehiculos.set("Motos", moto);
+        Vehiculos.set("Automovil", auto);
+        Vehiculos.set("Buseta", buseta);
+        Vehiculos.set("Volqueta", volqueta);
 
 //        ChartSeries Autos = new ChartSeries(); // Esto me sirve para comparar con otros datos 
 //        Autos.setLabel("Automovil");
 ////        Autos.set("Automovil", 52);
-        model.addSeries(motos);
+        model.addSeries(Vehiculos);
 //        model.addSeries(Autos);
         return model;
     }
@@ -722,11 +780,11 @@ public class BeanParqueadero implements Serializable {
 
                 //De esta forma se adiciona los elementos
                 Element elemento = new Element(temp.getDato().getPlaca(), x + "em", y + "em");
-                temp = temp.getSiguiente();
                 model2.addElement(elemento);
-
-                elemento.addEndPoint(new BlankEndPoint(EndPointAnchor.TOP));
-                elemento.addEndPoint(new BlankEndPoint(EndPointAnchor.BOTTOM_RIGHT));
+                elemento.addEndPoint(new DotEndPoint(EndPointAnchor.LEFT));
+                elemento.addEndPoint(new DotEndPoint(EndPointAnchor.BOTTOM));
+                elemento.setId(temp.getDato().getPlaca());
+                temp = temp.getSiguiente();
                 x += 10;
                 y += 6;
 
@@ -753,8 +811,26 @@ public class BeanParqueadero implements Serializable {
         if (label != null) {
             conn.getOverlays().add(new LabelOverlay(label, "flow-label", 0.5));
         }
-
         return conn;
+    }
+
+    public void eliminarPorPlacaProfesor() {//-------------Metodo para eliminar posiciones por placa---------------------------------nuevo
+        listaVehiculos.eliminarNodoXPlaca(PlacaSeleccionada);
+        irAlSguiente();
+    }
+
+    public void enviarAlFinalProfesor() {//-------------Metodo para enviar al final por placa---------------------------------nuevo
+        listaVehiculos.enviarAlFinal(PlacaSeleccionada);
+        irAlPrimero();
+    }
+
+    public void enviarAlInicioProfesor() {//-------------Metodo para enviar al inicio por placa---------------------------------nuevo
+        listaVehiculos.enviarAlInicio(PlacaSeleccionada);
+        irAlPrimero();
+    }
+
+    public void modificarInformacionDiagramaProfesor() { //-------------Metodo para modificar la informacion de fecha y valor pagado---------------------------------nuevo
+        listaVehiculos.modificarInformacionDiagrama(PlacaSeleccionada, nodoMostrar.getDato().getNuevofechaHoraEntrada(), nodoMostrar.getDato().getNuevoValorAPagar());
     }
 
     //=================================================================Diagrama que tiene lo requerido del click===================================
@@ -774,7 +850,7 @@ public class BeanParqueadero implements Serializable {
 
         selection = new DefaultOrganigramNode();
 
-        rootNode = new DefaultOrganigramNode("pintarTitulo", "Placas de Autos", null); //Nodo pricipal titulo
+        rootNode = new DefaultOrganigramNode("pintarTitulo", "Placas de Vehiculos", null); //Nodo pricipal titulo
         rootNode.setCollapsible(false);
         rootNode.setDroppable(true);
 
@@ -792,9 +868,9 @@ public class BeanParqueadero implements Serializable {
 
     protected OrganigramNode addDivision(OrganigramNode parent, String name) { //Metodo que adiciona las diviciones requeridas
         OrganigramNode divisionNode = new DefaultOrganigramNode("pintarDiagrama", name, parent);
-        divisionNode.setDroppable(true);
-        divisionNode.setDraggable(true);
-        divisionNode.setSelectable(true);
+        divisionNode.setDroppable(true);//
+        divisionNode.setDraggable(true);//Arrastable
+        divisionNode.setSelectable(true);//Seleccionable
 
         return divisionNode;
     }
@@ -803,7 +879,8 @@ public class BeanParqueadero implements Serializable {
         OrganigramNode currentSelection = OrganigramHelper.findTreeNode(rootNode, selection);
         setDatoDeplaca("" + currentSelection.getData());
         listaVehiculos.eliminarNodoXPlaca(getDatoDeplaca());
-        irAlPrimero();
+        listaVehiculos.eliminarNodoXPlaca(PlacaSeleccionada);
+        irAlSguiente();
     }
 
     public void enviarAlFinal() {//-------------Metodo para enviar al final por placa---------------------------------nuevo
@@ -917,4 +994,17 @@ public class BeanParqueadero implements Serializable {
     public void setAutoScrollToSelection(boolean autoScrollToSelection) {
         this.autoScrollToSelection = autoScrollToSelection;
     }
+
+    
+    //===================================================Metodo Que permite tomar la placa seleccionada en el click==
+    public void onClickRight() {
+        String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("elementId");
+        PlacaSeleccionada = id.replaceAll("frmVehiculos:diagrama-", "");
+        PlacaSeleccionada2 = id.replaceAll("frmVehiculos:primerDiagramRealizado-", "");
+        System.out.println("PlacaSeleccionada = " + PlacaSeleccionada); //Solo para realizar pruebas
+//        System.out.println("PlacaSeleccionada = " + PlacaSeleccionada2);
+    }
+
+    private String PlacaSeleccionada = "";
+    private String PlacaSeleccionada2 = "";
 }

@@ -9,5 +9,41 @@
             <base-name>/parqueaderoweb/Bundle</base-name>
             <var>bundle</var>
         </resource-bundle>
-    </application>           
+    </application>
+    <navigation-rule>
+        <from-view-id>/inicioDePagina/iniciodepagina.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>listase</from-outcome>
+            <to-view-id>/listase/listase.xhtml</to-view-id>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>listade</from-outcome>
+            <to-view-id>/listaDE/listade.xhtml</to-view-id>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>listadec</from-outcome>
+            <to-view-id>/listaDEC/listadec.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <from-view-id>/listase/listase.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>homelistase</from-outcome>
+            <to-view-id>/inicioDePagina/iniciodepagina.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <from-view-id>/listaDE/listade.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>homelistade</from-outcome>
+            <to-view-id>/inicioDePagina/iniciodepagina.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    <navigation-rule>
+        <from-view-id>/listaDEC/listadec.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>homelistadec</from-outcome>
+            <to-view-id>/inicioDePagina/iniciodepagina.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
 </faces-config>
